@@ -1,0 +1,61 @@
+import type { DefaultTheme } from 'styled-components'
+
+export const theme: DefaultTheme = {
+  colors: {
+    bg: '#0D0D0D',
+    bgSecondary: '#1A1A2E',
+    bgCard: '#111827',
+    accent: '#E63946',
+    accentDark: '#C1121F',
+    text: '#FFFFFF',
+    textMuted: '#9CA3AF',
+    textDim: '#4B5563',
+    border: '#1F2937',
+    borderLight: '#374151',
+    success: '#10B981',
+    error: '#EF4444',
+  },
+  fonts: {
+    heading: "'Montserrat', sans-serif",
+    body: "'Inter', sans-serif",
+  },
+  fontSizes: {
+    xs: '0.75rem',
+    sm: '0.875rem',
+    base: '1rem',
+    md: '1.125rem',
+    lg: '1.25rem',
+    xl: '1.5rem',
+    '2xl': '2rem',
+    '3xl': '2.5rem',
+    '4xl': '3rem',
+    '5xl': '4rem',
+    '6xl': '5.5rem',
+  },
+  spacing: {
+    xs: '0.5rem',
+    sm: '1rem',
+    md: '1.5rem',
+    lg: '2rem',
+    xl: '3rem',
+    '2xl': '4rem',
+    '3xl': '6rem',
+    section: '8rem',
+  },
+  breakpoints: {
+    sm: '640px',
+    md: '768px',
+    lg: '1024px',
+    xl: '1280px',
+  },
+  transitions: {
+    fast: '150ms ease',
+    base: '300ms ease',
+    slow: '600ms ease',
+  },
+  shadows: {
+    card: '0 4px 24px rgba(0, 0, 0, 0.4)',
+    glow: '0 0 20px rgba(230, 57, 70, 0.3)',
+    glowStrong: '0 0 40px rgba(230, 57, 70, 0.5)',
+  },
+}
