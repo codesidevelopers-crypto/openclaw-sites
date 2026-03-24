@@ -99,11 +99,16 @@ export function applyMapping(
         continue
       }
     } else {
-      const rawAmount = row[mapping.amount] ?? ''
+      const amountKey = mapping.amount ?? ''
+      const rawAmount = row[amountKey] ?? ''
       const signed = cleanAmount(rawAmount)
       if (signed === 0) continue
       amount = Math.abs(signed)
-      direction = signed > 0 ? 'inflow' : 'outflow'
+      if (mapping.amount_sign === 'positive_is_inflow') {
+        direction = signed > 0 ? 'inflow' : 'outflow'
+      } else {
+        direction = signed > 0 ? 'inflow' : 'outflow'
+      }
     }
 
     results.push({

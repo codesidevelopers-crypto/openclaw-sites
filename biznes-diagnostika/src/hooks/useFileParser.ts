@@ -174,26 +174,46 @@ export function useFileParser(): {
       // Parse 1C format or other non-tabular formats
       if (llmResult.format === '1c_exchange') {
         const rows1C = parse1CTransactions(rawText, llmResult)
-        // Map 1C fields to our standard fields
+        
+        if (rows1C.length === 0) return []
+
+        // Use LLM-provided mapping to map 1C fields
+        const llmMapping = llmResult.mapping || {} as Record<string, string | null | undefined>
         const mapping: ColumnMapping = {
-          date: 'Дата',
-          date_format: 'DD.MM.YYYY',
-          amount: 'Сумма',
-          amount_sign: 'signed' as const,
-          counterparty: 'Плательщик1',
-          inn: 'ПлательщикИНН',
-          description: 'НазначениеПлатежа',
-          account: 'ПлательщикСчет',
+          date: (llmMapping.date as string) || 'Дата',
+          date_format: (llmMapping.date_format as string) || 'DD.MM.YYYY',
+          amount: (llmMapping.amount as string) || 'Сумма',
+          amount_sign: (llmMapping.amount_sign as 'signed' | 'separate_columns' | 'positive_is_inflow') || 'signed',
+          amount_debit: (llmMapping.amount_debit as string) || undefined,
+          amount_credit: (llmMapping.amount_credit as string) || undefined,
+          counterparty: (llmMapping.counterparty as string) || undefined,
+          inn: (llmMapping.inn as string) || undefined,
+          description: (llmMapping.description as string) || undefined,
+          account: (llmMapping.account as string) || undefined,
         }
-        // Try common 1C field names
-        if (rows1C.length > 0) {
-          const sample = rows1C[0]
-          if (sample['Получатель1'] && !sample['Плательщик1']) {
-            mapping.counterparty = 'Получатель1'
-            mapping.inn = 'ПолучательИНН'
-            mapping.account = 'ПолучательСчет'
+
+        // For 1C: check if LLM fields exist in data, try alternatives
+        const sample = rows1C[0]
+        if (mapping.counterparty && !sample[mapping.counterparty]) {
+          // Try common 1C field name variants
+          const altNames = ['Получатель1', 'ПолучательНаименование1', 'Плательщик1', 'ПлательщикНаименование1', 'Получатель', 'Плательщик', 'Контрагент']
+          for (const alt of altNames) {
+            if (sample[alt]) { mapping.counterparty = alt; break }
           }
         }
+        if (mapping.description && !sample[mapping.description]) {
+          const altDesc = ['НазначениеПлатежа', 'Назначение', 'НазначениеПлатежа1']
+          for (const alt of altDesc) {
+            if (sample[alt]) { mapping.description = alt; break }
+          }
+        }
+        if (mapping.inn && !sample[mapping.inn]) {
+          const altInn = ['ПлательщикИНН', 'ПолучательИНН', 'ИНН']
+          for (const alt of altInn) {
+            if (sample[alt]) { mapping.inn = alt; break }
+          }
+        }
+
         const rawTxs = applyMapping(rows1C, mapping, fileName)
         return rawTxs.map((raw) => {
           const classification = classifyTransaction(raw)
@@ -209,8 +229,9 @@ export function useFileParser(): {
         })
       }
       
-      // If LLM returned pre-parsed transactions
+      // If LLM returned pre-parsed transactions as samples — still parse the full file
       if (llmResult.transactions && llmResult.transactions.length > 0) {
+        // Use the sample transactions as a last resort
         return llmResult.transactions.map((tx) => {
           const amount = Number(tx.amount) || 0
           const base = {
