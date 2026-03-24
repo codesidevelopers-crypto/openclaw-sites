@@ -1,0 +1,33 @@
+{
+  "name": "biznes-diagnostika",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "gatsby build",
+    "develop": "gatsby develop"
+  },
+  "dependencies": {
+    "gatsby": "^5.14.6",
+    "gatsby-plugin-google-fonts": "*",
+    "gatsby-plugin-image": "*",
+    "gatsby-plugin-manifest": "*",
+    "gatsby-plugin-sharp": "*",
+    "gatsby-plugin-styled-components": "*",
+    "gatsby-plugin-typescript": "*",
+    "gatsby-transformer-sharp": "*",
+    "papaparse": "^5.5.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^3.8.0",
+    "styled-components": "^6.3.12",
+    "typescript": "^5.4.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/node": "*"
+  }
+}
