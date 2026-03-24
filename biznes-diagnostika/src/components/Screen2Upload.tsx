@@ -378,7 +378,7 @@ export function Screen2Upload(): JSX.Element {
         updateFile(file.name, { status: 'error', error: msg })
       }
     },
-    [addFile, updateFile, parseFile, getCaptchaToken, buildTransactionsFromMapping],
+    [addFile, updateFile, parseFile, requestCaptchaAndMap, buildTransactionsFromMapping],
   )
 
   const handleFiles = useCallback(
