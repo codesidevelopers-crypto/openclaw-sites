@@ -1,0 +1,10 @@
+node_modules/
+.cache/
+public/
+.claude-prompt.txt
+qa-screenshots/
+qa-*.json
+qa-*.js
+qa-*.ts
+*.log
+.claude/
