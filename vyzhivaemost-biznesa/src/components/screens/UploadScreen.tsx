@@ -400,28 +400,45 @@ export const UploadScreen: React.FC = () => {
         }
 
       } else if (ext === 'txt') {
-        // Try 1C format
-        let content = new TextDecoder('utf-8').decode(buf)
-        const hasCyrillic = /[а-яА-ЯёЁ]/.test(content)
-        if (!hasCyrillic) {
-          try { content = new TextDecoder('windows-1251').decode(buf) } catch { /* keep utf8 */ }
-        }
+        // Decode as both UTF-8 and Windows-1251, pick the one with more Cyrillic chars
+        const utf8 = new TextDecoder('utf-8').decode(buf)
+        const win1251 = new TextDecoder('windows-1251').decode(buf)
+        const countCyrillic = (s: string): number => (s.match(/[а-яА-ЯёЁ]/g) ?? []).length
+        const content = countCyrillic(win1251) > countCyrillic(utf8) ? win1251 : utf8
 
-        if (content.includes('1CClientBankExchange') || content.includes('СекцияДокумент')) {
+        const is1C = (s: string): boolean =>
+          s.includes('1CClientBankExchange') || s.includes('СекцияДокумент')
+
+        if (is1C(utf8) || is1C(win1251)) {
+          // Use whichever decoded version contains the 1C marker
+          const content1C = is1C(win1251) ? win1251 : utf8
           base.format = '1c'
-          const { transactions, accountNumbers } = parse1C(content, file.name)
+          const { transactions, accountNumbers } = parse1C(content1C, file.name)
           base.transactions = transactions
           if (accountNumbers.length > 0) base.detectedAccountNumber = accountNumbers[0]
           base.status = transactions.length > 0 ? 'ok' : 'error'
           if (transactions.length === 0) base.error = 'Не удалось разобрать 1C формат'
         } else {
-          // Try CSV
+          // Try CSV/TSV with common delimiters; test both encodings and pick the better parse
+          const parseWithDelimiters = (text: string) => {
+            // Try auto-detect first, then fallback to semicolon, then pipe
+            for (const delimiter of [undefined, ';', '|', '\t', ',']) {
+              const r = Papa!.parse<Record<string, unknown>>(text, {
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: false,
+                ...(delimiter !== undefined ? { delimiter } : {}),
+              })
+              if (r.data.length > 0 && (r.meta.fields?.length ?? 0) > 1) return r
+            }
+            return Papa!.parse<Record<string, unknown>>(text, { header: true, skipEmptyLines: true, dynamicTyping: false })
+          }
+
+          const resultUtf8 = parseWithDelimiters(utf8)
+          const resultWin = parseWithDelimiters(win1251)
+          const result = resultWin.data.length > resultUtf8.data.length ? resultWin : resultUtf8
+
           base.format = 'csv'
-          const result = Papa!.parse<Record<string, unknown>>(content, {
-            header: true,
-            skipEmptyLines: true,
-            dynamicTyping: false,
-          })
           if (result.data.length > 0) {
             const headers = result.meta.fields ?? []
             base.rawHeaders = headers
@@ -434,7 +451,7 @@ export const UploadScreen: React.FC = () => {
               base.status = 'mapping_required'
             }
           } else {
-            throw new Error('Не удалось определить формат файла')
+            throw new Error('Формат файла не распознан. Поддерживаются: CSV, XLSX, TXT (1С формат kl_to_1c)')
           }
         }
       }
