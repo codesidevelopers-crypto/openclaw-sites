@@ -11,6 +11,7 @@ export interface AppState {
   results: DiagnosticResult | null
   sessionId: string
   utmParams: Record<string, string>
+  captchaSolved: boolean
 }
 
 interface AppContextValue extends AppState {
@@ -18,6 +19,7 @@ interface AppContextValue extends AppState {
   setParsedFiles: (files: ParsedFile[]) => void
   setQuestionnaire: (q: QuestionnaireAnswers) => void
   setResults: (r: DiagnosticResult) => void
+  setCaptchaSolved: (solved: boolean) => void
 }
 
 function generateSessionId(): string {
@@ -42,6 +44,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [results, setResults] = useState<DiagnosticResult | null>(null)
   const [sessionId] = useState(generateSessionId)
   const [utmParams, setUtmParams] = useState<Record<string, string>>({})
+  const [captchaSolved, setCaptchaSolved] = useState<boolean>(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -76,10 +79,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       results,
       sessionId,
       utmParams,
+      captchaSolved,
       goTo,
       setParsedFiles,
       setQuestionnaire,
       setResults,
+      setCaptchaSolved,
     }}>
       {children}
     </AppContext.Provider>

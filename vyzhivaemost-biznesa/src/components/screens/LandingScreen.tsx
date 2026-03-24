@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { useApp } from '../../context/AppContext'
+import { CaptchaModal } from '../CaptchaModal'
 
 const fadeUp = keyframes`
   from { opacity: 0; transform: translateY(24px); }
@@ -320,11 +321,33 @@ const features = [
 ]
 
 export const LandingScreen: React.FC = () => {
-  const { goTo } = useApp()
+  const { goTo, captchaSolved, setCaptchaSolved } = useApp()
   const heroRef = useRef<HTMLElement>(null)
+  const [showCaptcha, setShowCaptcha] = useState<boolean>(false)
+
+  const handleCTA = (): void => {
+    if (captchaSolved) {
+      goTo('upload')
+    } else {
+      setShowCaptcha(true)
+    }
+  }
+
+  const handleCaptchaSuccess = (): void => {
+    setCaptchaSolved(true)
+    setShowCaptcha(false)
+    goTo('upload')
+  }
 
   return (
     <Wrap>
+      {showCaptcha && (
+        <CaptchaModal
+          onSuccess={handleCaptchaSuccess}
+          onClose={() => setShowCaptcha(false)}
+        />
+      )}
+
       <Hero ref={heroRef}>
         <Orb $delay={0} $x={15} $y={20} $size={300} />
         <Orb $delay={2} $x={75} $y={60} $size={400} />
@@ -350,7 +373,7 @@ export const LandingScreen: React.FC = () => {
             ))}
           </Subtitle>
 
-          <CTAButton onClick={() => goTo('upload')}>
+          <CTAButton onClick={handleCTA}>
             Начать диагностику
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -378,7 +401,7 @@ export const LandingScreen: React.FC = () => {
               Ваши финансовые данные не покидают устройство. Загрузите выписки любого банка — парсинг, анализ и визуализация происходят прямо в браузере без передачи данных на сервер.
             </p>
           </BannerText>
-          <CTAButton onClick={() => goTo('upload')} style={{ whiteSpace: 'nowrap' }}>
+          <CTAButton onClick={handleCTA} style={{ whiteSpace: 'nowrap' }}>
             Загрузить выписки
           </CTAButton>
         </BottomBanner>
