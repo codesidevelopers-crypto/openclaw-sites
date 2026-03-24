@@ -253,7 +253,7 @@ interface CaptchaState {
   question: string
   answer: string
   pendingFileName: string
-  resolve: ((token: string) => void) | null
+  resolve: ((answer: string) => void) | null
 }
 
 export function Screen2Upload(): JSX.Element {
@@ -270,14 +270,23 @@ export function Screen2Upload(): JSX.Element {
     resolve: null,
   })
 
-  const getCaptchaToken = useCallback(
-    (fileName: string): Promise<string> => {
-      // If we already have a token from this session, reuse it
-      if (state.captchaToken) return Promise.resolve(state.captchaToken)
+  const requestCaptchaAndMap = useCallback(
+    (headers: string[], sampleRows: Record<string, string>[]): Promise<ColumnMapping | null> => {
+      // If we already solved captcha this session, call map directly without captcha
+      if (state.captchaToken) {
+        return fetch('/api/map-columns', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ headers, sampleRows, captchaToken: state.captchaToken, captchaAnswer: '0' }),
+        })
+          .then((r) => r.ok ? r.json() as Promise<{ mapping: ColumnMapping }> : null)
+          .then((d) => d?.mapping ?? null)
+          .catch(() => null)
+      }
 
+      // First time: get captcha, show modal, wait for answer, then map
       return new Promise((resolve) => {
-        // Simulate getting a captcha question
-        fetch('/api/captcha')
+        fetch('/api/captcha', { method: 'POST' })
           .then((r) => r.json())
           .then((data: { token: string; question: string }) => {
             setCaptcha({
@@ -285,41 +294,37 @@ export function Screen2Upload(): JSX.Element {
               token: data.token,
               question: data.question,
               answer: '',
-              pendingFileName: fileName,
-              resolve,
+              pendingFileName: '',
+              resolve: (captchaAnswer: string) => {
+                fetch('/api/map-columns', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ headers, sampleRows, captchaToken: data.token, captchaAnswer }),
+                })
+                  .then((r) => {
+                    if (r.ok) {
+                      setCaptchaToken(data.token)
+                      return r.json() as Promise<{ mapping: ColumnMapping }>
+                    }
+                    return null
+                  })
+                  .then((d) => resolve(d?.mapping ?? null))
+                  .catch(() => resolve(null))
+              },
             })
           })
-          .catch(() => {
-            // If captcha endpoint unavailable, proceed without (dev mode)
-            resolve('dev-token')
-          })
+          .catch(() => resolve(null))
       })
     },
-    [state.captchaToken],
+    [state.captchaToken, setCaptchaToken],
   )
 
-  const submitCaptcha = useCallback(async () => {
+  const submitCaptcha = useCallback(() => {
     if (!captcha.resolve) return
-
-    try {
-      const res = await fetch('/api/map-columns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          captchaToken: captcha.token,
-          captchaAnswer: captcha.answer,
-        }),
-      })
-      if (res.ok) {
-        setCaptchaToken(captcha.token)
-        captcha.resolve(captcha.token)
-      }
-    } catch {
-      captcha.resolve(captcha.token)
-    }
-
+    const answer = captcha.answer.trim()
+    captcha.resolve(answer)
     setCaptcha((c) => ({ ...c, visible: false, resolve: null }))
-  }, [captcha, setCaptchaToken])
+  }, [captcha])
 
   const processFile = useCallback(
     async (file: File) => {
@@ -339,24 +344,9 @@ export function Screen2Upload(): JSX.Element {
         updateFile(file.name, { status: 'mapping' })
         const { headers, rows } = await parseFile(file)
 
-        // Get column mapping from LLM via API
+        // Get column mapping: try LLM first, fallback to auto-detect
         const sampleRows = rows.slice(0, 5)
-        const captchaToken = await getCaptchaToken(file.name)
-
-        let mapping: ColumnMapping | null = null
-        try {
-          const res = await fetch('/api/map-columns', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ headers, sampleRows, captchaToken, captchaAnswer: '' }),
-          })
-          if (res.ok) {
-            const data = (await res.json()) as { mapping: ColumnMapping }
-            mapping = data.mapping
-          }
-        } catch {
-          // API unavailable — try auto-detect
-        }
+        let mapping: ColumnMapping | null = await requestCaptchaAndMap(headers, sampleRows)
 
         // Auto-detect fallback if API failed
         if (!mapping) {
@@ -513,6 +503,18 @@ export function Screen2Upload(): JSX.Element {
               value={captcha.answer}
               onChange={(e) => setCaptcha((c) => ({ ...c, answer: e.target.value }))}
               onKeyDown={(e) => e.key === 'Enter' && submitCaptcha()}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: '#0B1120',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '8px',
+                color: '#F9FAFB',
+                fontSize: '1.1rem',
+                fontFamily: 'monospace',
+                outline: 'none',
+              }}
+              autoFocus
             />
             <PrimaryBtn onClick={submitCaptcha} disabled={!captcha.answer.trim()}>
               Подтвердить
