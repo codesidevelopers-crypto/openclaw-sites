@@ -258,7 +258,7 @@ interface CaptchaState {
 
 export function Screen2Upload(): JSX.Element {
   const { state, setScreen, addFile, updateFile, setCaptchaToken } = useApp()
-  const { parseFile, buildTransactionsFromMapping } = useFileParser()
+  const { parseFile, buildTransactionsFromMapping, buildTransactionsFromRaw } = useFileParser()
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [captcha, setCaptcha] = useState<CaptchaState>({
@@ -270,21 +270,29 @@ export function Screen2Upload(): JSX.Element {
     resolve: null,
   })
 
-  const requestCaptchaAndMap = useCallback(
-    (headers: string[], sampleRows: Record<string, string>[]): Promise<ColumnMapping | null> => {
-      // If we already solved captcha this session, call map directly without captcha
-      if (state.captchaToken) {
-        return fetch('/api/map-columns', {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const requestMapping = useCallback(
+    (headers: string[], sampleRows: Record<string, string>[], rawText?: string): Promise<any> => {
+      const payload = rawText
+        ? { rawText: rawText.slice(0, 5000), captchaToken: '', captchaAnswer: '' }
+        : { headers, sampleRows, captchaToken: '', captchaAnswer: '' }
+
+      const doFetch = (token: string, answer: string) =>
+        fetch('/api/map-columns', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ headers, sampleRows, captchaToken: state.captchaToken, captchaAnswer: '0' }),
+          body: JSON.stringify({ ...payload, captchaToken: token, captchaAnswer: answer }),
         })
-          .then((r) => r.ok ? r.json() as Promise<{ mapping: ColumnMapping }> : null)
-          .then((d) => d?.mapping ?? null)
+          .then((r) => r.ok ? r.json() : null)
+          .then((d: { mapping?: unknown } | null) => d?.mapping ?? null)
           .catch(() => null)
+
+      // If we already solved captcha this session
+      if (state.captchaToken) {
+        return doFetch(state.captchaToken, '0')
       }
 
-      // First time: get captcha, show modal, wait for answer, then map
+      // First time: get captcha, show modal, wait for answer
       return new Promise((resolve) => {
         fetch('/api/captcha', { method: 'POST' })
           .then((r) => r.json())
@@ -296,20 +304,8 @@ export function Screen2Upload(): JSX.Element {
               answer: '',
               pendingFileName: '',
               resolve: (captchaAnswer: string) => {
-                fetch('/api/map-columns', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ headers, sampleRows, captchaToken: data.token, captchaAnswer }),
-                })
-                  .then((r) => {
-                    if (r.ok) {
-                      setCaptchaToken(data.token)
-                      return r.json() as Promise<{ mapping: ColumnMapping }>
-                    }
-                    return null
-                  })
-                  .then((d) => resolve(d?.mapping ?? null))
-                  .catch(() => resolve(null))
+                setCaptchaToken(data.token)
+                doFetch(data.token, captchaAnswer).then(resolve)
               },
             })
           })
@@ -342,11 +338,41 @@ export function Screen2Upload(): JSX.Element {
       try {
         // Parse file
         updateFile(file.name, { status: 'mapping' })
-        const { headers, rows } = await parseFile(file)
+        const parsed = await parseFile(file)
+        const { headers, rows, rawText, isRawFormat } = parsed
 
-        // Get column mapping: try LLM first, fallback to auto-detect
+        if (isRawFormat && rawText) {
+          // Non-tabular format (1C, etc.) — send raw text to LLM
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const llmResult = await requestMapping([], [], rawText) as any
+          if (llmResult) {
+            const transactions = buildTransactionsFromRaw(rawText, llmResult, file.name)
+            if (transactions.length > 0) {
+              const txDates = transactions.map((tx) => tx.date)
+              const periodStart = new Date(Math.min(...txDates.map((d) => d.getTime())))
+              const periodEnd = new Date(Math.max(...txDates.map((d) => d.getTime())))
+              updateFile(file.name, {
+                rawRows: [],
+                headers: [],
+                mapping: null,
+                transactions,
+                rowCount: transactions.length,
+                status: 'parsed',
+                periodStart,
+                periodEnd,
+              })
+              return
+            }
+          }
+          updateFile(file.name, { status: 'error', error: 'Не удалось разобрать формат файла. Попробуйте CSV или XLSX.' })
+          return
+        }
+
+        // Tabular format — get column mapping
         const sampleRows = rows.slice(0, 5)
-        let mapping: ColumnMapping | null = await requestCaptchaAndMap(headers, sampleRows)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const llmMapping = await requestMapping(headers, sampleRows) as any
+        let mapping: ColumnMapping | null = llmMapping?.mapping ?? llmMapping
 
         // Auto-detect fallback if API failed
         if (!mapping) {
@@ -378,7 +404,7 @@ export function Screen2Upload(): JSX.Element {
         updateFile(file.name, { status: 'error', error: msg })
       }
     },
-    [addFile, updateFile, parseFile, requestCaptchaAndMap, buildTransactionsFromMapping],
+    [addFile, updateFile, parseFile, requestMapping, buildTransactionsFromMapping, buildTransactionsFromRaw],
   )
 
   const handleFiles = useCallback(
