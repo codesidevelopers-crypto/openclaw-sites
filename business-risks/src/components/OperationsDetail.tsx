@@ -223,21 +223,23 @@ const OperationsDetail: React.FC<OperationsDetailProps> = ({ onCtaClick }) => (
         </Description>
         <VersionsRow>
           <VersionCard>
-            <VersionTitle>Базовая</VersionTitle>
+            <VersionTitle>Базовая — бесплатно</VersionTitle>
             <VersionList>
-              <VersionItem>Общий уровень риска</VersionItem>
-              <VersionItem>Счётчик до высокого риска</VersionItem>
-              <VersionItem>Базовые подсказки</VersionItem>
+              <VersionItem>Общий уровень риска по счёту</VersionItem>
+              <VersionItem>Счётчик до следующего уровня риска</VersionItem>
+              <VersionItem>Уведомления об изменении риска</VersionItem>
+              <VersionItem>Задача в интернет-банке при росте риска</VersionItem>
+              <VersionItem>Загрузка налоговых документов</VersionItem>
             </VersionList>
           </VersionCard>
           <VersionCard $featured>
-            <VersionTitle $featured>Полная</VersionTitle>
+            <VersionTitle $featured>Полная версия</VersionTitle>
             <VersionList>
               <VersionItem $featured>Риски по типам операций</VersionItem>
               <VersionItem $featured>Предупреждения до платежа</VersionItem>
-              <VersionItem $featured>Загрузка документов</VersionItem>
-              <VersionItem $featured>Интеграции с другими банками</VersionItem>
-              <VersionItem $featured>Расширенные рекомендации</VersionItem>
+              <VersionItem $featured>Загрузка документов из других банков</VersionItem>
+              <VersionItem $featured>Интеграция 1С:Бухгалтерия и 1С:УНФ</VersionItem>
+              <VersionItem $featured>Подробные рекомендации</VersionItem>
             </VersionList>
           </VersionCard>
         </VersionsRow>

@@ -58,9 +58,9 @@ const Grid = styled.div`
   }
 `
 
-const Card = styled.div<{ $featured?: boolean }>`
-  background: ${({ $featured, theme }) => $featured ? theme.colors.primaryLighter : theme.colors.gray50};
-  border: 1.5px solid ${({ $featured, theme }) => $featured ? theme.colors.primaryLight : theme.colors.gray200};
+const Card = styled.div`
+  background: ${({ theme }) => theme.colors.gray50};
+  border: 1.5px solid ${({ theme }) => theme.colors.gray200};
   border-radius: ${({ theme }) => theme.radius.xl};
   padding: 1.5rem;
   transition: all 0.25s;
@@ -70,7 +70,7 @@ const Card = styled.div<{ $featured?: boolean }>`
   &:hover {
     box-shadow: ${({ theme }) => theme.shadow.md};
     transform: translateY(-3px);
-    border-color: ${({ theme }) => theme.colors.primary};
+    border-color: ${({ theme }) => theme.colors.primaryLight};
   }
 `
 
@@ -85,19 +85,25 @@ const Icon = styled.div`
   font-size: 1.75rem;
 `
 
-const Tag = styled.span<{ $type: 'new' | 'top' | 'base' }>`
+const Tag = styled.span<{ $type: 'new' | 'base' }>`
   font-size: 0.7rem;
   font-weight: 700;
   padding: 0.2rem 0.6rem;
   border-radius: ${({ theme }) => theme.radius.full};
-  background: ${({ $type, theme }) =>
-    $type === 'new' ? '#FEF3C7' :
-    $type === 'top' ? theme.colors.primaryLight :
-    theme.colors.gray100};
-  color: ${({ $type, theme }) =>
-    $type === 'new' ? '#92400E' :
-    $type === 'top' ? theme.colors.primaryDark :
-    theme.colors.gray600};
+  background: ${({ $type }) => $type === 'new' ? '#FEF3C7' : '#F3F4F6'};
+  color: ${({ $type }) => $type === 'new' ? '#92400E' : '#6B7280'};
+`
+
+const FreeBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  background: ${({ theme }) => theme.colors.greenLight};
+  color: ${({ theme }) => theme.colors.green};
+  border-radius: ${({ theme }) => theme.radius.full};
+  padding: 0.2rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
 `
 
 const CardTitle = styled.h3`
@@ -161,42 +167,42 @@ const CardLink = styled.button`
 interface ProductItem {
   icon: string
   title: string
-  tag?: { text: string; type: 'new' | 'top' | 'base' }
+  tag?: { text: string; type: 'new' | 'base' }
   desc: string
   features: string[]
-  href?: string
-  featured?: boolean
+  freeBase?: boolean
 }
 
 const products: ProductItem[] = [
   {
     icon: '📈',
     title: 'Риски по операциям',
-    desc: 'Видите общий уровень риска и понимаете, что на него влияет. Получаете предупреждения до проведения платежей.',
+    desc: 'Видьте общий уровень риска и понимайте, что на него влияет. Получайте предупреждения до проведения платежей.',
     features: [
       'Общий уровень риска по счёту',
       'Риски по типам операций',
-      'Счётчик до высокого риска',
-      'Рекомендации и подсказки',
-      'Загрузка документов из любого банка',
+      'Счётчик до следующего уровня риска',
+      'Предупреждения в момент платежа',
+      'Подробные рекомендации',
     ],
+    freeBase: true,
   },
   {
     icon: '🔎',
     title: 'Риски по контрагентам',
-    desc: 'Проверяйте партнёров до отправки денег — не после. Безлимитные проверки и мониторинг изменений.',
+    desc: 'Проверяйте партнёров до отправки денег. Безлимитные проверки и мониторинг изменений — всё включено.',
     features: [
       'Проверка до платежа',
       'Понятные сигналы риска',
       'Расширенные подсказки при оплате',
       'Безлимитные проверки',
-      'Мониторинг изменений',
+      'Безлимитный мониторинг изменений',
     ],
   },
   {
     icon: '🏛️',
     title: 'Надзорные органы',
-    desc: 'Узнайте о плановых проверках и профилактических визитах раньше, чем они придут к вам.',
+    desc: 'Узнайте о плановых проверках и профилактических визитах заранее — пока есть время подготовиться.',
     features: [
       'Раннее предупреждение о проверках',
       'Профилактические визиты',
@@ -206,19 +212,29 @@ const products: ProductItem[] = [
   {
     icon: '⚖️',
     title: 'Арбитражные дела',
-    desc: 'Следите за исками в реальном времени. Не пропустите важное судебное событие по вашему бизнесу.',
+    desc: 'Следите за судебными событиями в арбитраже в реальном времени. Новый иск — сразу в уведомлении.',
     features: [
       'Уведомления о новых исках',
       'История арбитражных дел',
-      'Мониторинг изменений',
+      'Мониторинг по контрагентам',
     ],
   },
   {
     icon: '📋',
-    title: 'Исполнительные производства',
-    desc: 'Мониторинг появлений в базе ФССП — защитите репутацию и операционную устойчивость бизнеса.',
+    title: 'Судебные дела',
+    desc: 'Суды общей юрисдикции — отдельный мониторинг. Не смешивайте с арбитражем. Узнайте о деле первым.',
     features: [
-      'Мониторинг в ФССП',
+      'Уведомления о новых делах',
+      'Суды общей юрисдикции',
+      'Мониторинг по вашей компании',
+    ],
+  },
+  {
+    icon: '📂',
+    title: 'Исполнительные производства',
+    desc: 'Мониторинг появлений в базе ФССП. Узнайте раньше, чем это повлияет на расчёты с партнёрами.',
+    features: [
+      'Мониторинг в базе ФССП',
       'Уведомления о новых производствах',
       'Репутационные риски',
     ],
@@ -227,35 +243,23 @@ const products: ProductItem[] = [
     icon: '👷',
     title: 'Риски по самозанятым',
     tag: { text: 'Новое', type: 'new' },
-    desc: 'Новый модуль для тех, кто работает с самозанятыми. Оцените риски и контролируйте статус.',
+    desc: 'Для тех, кто работает с самозанятыми. Раннее предупреждение о рисках регулярных выплат физлицам.',
     features: [
       'Оценка рисков при работе с СМЗ',
       'Контроль статуса самозанятого',
       'Контроль лимитов дохода',
-      'Рекомендации по работе',
+      'Рекомендации по оформлению',
     ],
   },
   {
-    icon: '⭐',
-    title: 'Всё включено',
-    tag: { text: 'Топ выбор', type: 'top' },
-    desc: 'Вся экосистема в одном тарифе. Годовая подписка со скидкой для тех, кто хочет полный контроль.',
+    icon: '🔀',
+    title: 'Признаки дробления бизнеса',
+    tag: { text: 'Новое', type: 'new' },
+    desc: 'Помогает заметить признаки, которые могут привлечь внимание банка и регуляторов — до серьёзных последствий.',
     features: [
-      'Все 6 продуктов сразу',
-      'Годовая подписка — выгоднее',
-      'Приоритетная поддержка',
-      'Единый дашборд рисков',
-    ],
-    featured: true,
-  },
-  {
-    icon: '🔧',
-    title: 'Конструктор',
-    desc: 'Выберите только нужные модули и платите за то, что реально используете.',
-    features: [
-      'Гибкий выбор сервисов',
-      'Удобнее и дешевле поштучно',
-      'Добавляйте модули в любой момент',
+      'Сигналы раннего предупреждения',
+      'Анализ структуры операций',
+      'Рекомендации по снижению риска',
     ],
   },
 ]
@@ -263,31 +267,32 @@ const products: ProductItem[] = [
 const Products: React.FC<ProductsProps> = ({ onCtaClick }) => (
   <Section id="products">
     <Container>
-      <SectionLabel>Экосистема продуктов</SectionLabel>
-      <Title>Все продукты «Рисков бизнеса»</Title>
+      <SectionLabel>Продуктовые модули</SectionLabel>
+      <Title>Все 8 модулей «Рисков бизнеса»</Title>
       <Subtitle>
-        Выберите отдельный сервис, соберите конструктор или возьмите сразу всё —
-        каждый продукт работает в вашем интернет-банке Точки.
+        Восемь продуктовых модулей для полного контроля рисков. Подключите
+        нужные по отдельности или возьмите все сразу в формате «Всё включено».
       </Subtitle>
       <Grid>
         {products.slice(0, 4).map(p => (
-          <Card key={p.title} $featured={p.featured}>
+          <Card key={p.title}>
             <CardTop>
               <Icon>{p.icon}</Icon>
               {p.tag && <Tag $type={p.tag.type}>{p.tag.text}</Tag>}
             </CardTop>
+            {p.freeBase && <FreeBadge>✓ Базовая версия бесплатно</FreeBadge>}
             <CardTitle>{p.title}</CardTitle>
             <CardDesc>{p.desc}</CardDesc>
             <Features>
               {p.features.map(f => <Feature key={f}>{f}</Feature>)}
             </Features>
-            <CardLink onClick={() => onCtaClick(p.title)}>Подключить →</CardLink>
+            <CardLink onClick={() => onCtaClick(p.title)}>Подробнее →</CardLink>
           </Card>
         ))}
       </Grid>
       <Grid>
         {products.slice(4).map(p => (
-          <Card key={p.title} $featured={p.featured}>
+          <Card key={p.title}>
             <CardTop>
               <Icon>{p.icon}</Icon>
               {p.tag && <Tag $type={p.tag.type}>{p.tag.text}</Tag>}
@@ -297,7 +302,7 @@ const Products: React.FC<ProductsProps> = ({ onCtaClick }) => (
             <Features>
               {p.features.map(f => <Feature key={f}>{f}</Feature>)}
             </Features>
-            <CardLink onClick={() => onCtaClick(p.title)}>Подключить →</CardLink>
+            <CardLink onClick={() => onCtaClick(p.title)}>Подробнее →</CardLink>
           </Card>
         ))}
       </Grid>

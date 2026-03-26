@@ -11,6 +11,8 @@ import NewFeatures from '../components/NewFeatures'
 import Formats from '../components/Formats'
 import Scenarios from '../components/Scenarios'
 import WhyTochka from '../components/WhyTochka'
+import EcosystemServices from '../components/EcosystemServices'
+import ExpertHelp from '../components/ExpertHelp'
 import FAQ from '../components/FAQ'
 import FinalCTA from '../components/FinalCTA'
 import Footer from '../components/Footer'
@@ -39,6 +41,8 @@ const IndexPage: React.FC = () => {
         <Formats onCtaClick={openModal} />
         <Scenarios onCtaClick={openModal} />
         <WhyTochka />
+        <EcosystemServices onCtaClick={openModal} />
+        <ExpertHelp onCtaClick={openModal} />
         <FAQ />
         <FinalCTA onCtaClick={openModal} />
       </main>
