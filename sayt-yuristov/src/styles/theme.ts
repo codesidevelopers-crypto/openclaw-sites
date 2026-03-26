@@ -1,0 +1,63 @@
+import type { DefaultTheme } from 'styled-components'
+
+export const theme: DefaultTheme = {
+  colors: {
+    bg: '#0B2B26',
+    bgDeep: '#071C19',
+    bgCard: '#0F3530',
+    bgCardHover: '#143D38',
+    accent: '#D4AF37',
+    accentDark: '#B8941F',
+    accentLight: '#E8C84A',
+    text: '#F5F0E8',
+    textMuted: '#A89E8A',
+    textDim: '#5C6B68',
+    border: '#1A4040',
+    borderGold: 'rgba(212, 175, 55, 0.3)',
+    success: '#4CAF82',
+    error: '#E05454',
+  },
+  fonts: {
+    heading: "'Playfair Display', Georgia, serif",
+    body: "'Source Sans 3', sans-serif",
+  },
+  fontSizes: {
+    xs: '0.75rem',
+    sm: '0.875rem',
+    base: '1rem',
+    md: '1.125rem',
+    lg: '1.25rem',
+    xl: '1.5rem',
+    '2xl': '2rem',
+    '3xl': '2.5rem',
+    '4xl': '3.25rem',
+    '5xl': '4.5rem',
+    '6xl': '6rem',
+  },
+  spacing: {
+    xs: '0.5rem',
+    sm: '1rem',
+    md: '1.5rem',
+    lg: '2rem',
+    xl: '3rem',
+    '2xl': '5rem',
+    '3xl': '7rem',
+    section: '9rem',
+  },
+  breakpoints: {
+    sm: '640px',
+    md: '768px',
+    lg: '1024px',
+    xl: '1280px',
+  },
+  transitions: {
+    fast: '150ms ease',
+    base: '300ms ease',
+    slow: '600ms cubic-bezier(0.16, 1, 0.3, 1)',
+  },
+  shadows: {
+    card: '0 8px 32px rgba(0, 0, 0, 0.4)',
+    gold: '0 0 20px rgba(212, 175, 55, 0.25)',
+    goldStrong: '0 0 40px rgba(212, 175, 55, 0.45)',
+  },
+}
