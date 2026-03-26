@@ -2,9 +2,9 @@ import type { GatsbyConfig } from 'gatsby'
 
 const config: GatsbyConfig = {
   siteMetadata: {
-    title: 'Митигация бизнес-рисков | Защита вашего бизнеса',
-    description: 'Профессиональный анализ и митигация рисков малого и среднего бизнеса в России. Диагностика, консультации, защита от финансовых, юридических и операционных рисков.',
-    siteUrl: 'https://business-risks.ru',
+    title: 'Риски бизнеса — Точка Банк',
+    description: 'Сервис для управления рисками бизнеса: операции, контрагенты, юридические события. Видьте риски заранее — действуйте уверенно.',
+    siteUrl: 'https://business-risks.tochka.com',
   },
   plugins: [
     'gatsby-plugin-typescript',
@@ -13,9 +13,8 @@ const config: GatsbyConfig = {
       resolve: 'gatsby-plugin-google-fonts',
       options: {
         fonts: [
-          'PT+Serif:400,400i,700,700i',
-          'PT+Sans:400,400i,700',
-          'PT+Sans+Narrow:400,700',
+          'Golos+Text:400,500,600,700,900',
+          'Nunito:400,500,600,700',
         ],
         display: 'swap',
       },
@@ -23,11 +22,11 @@ const config: GatsbyConfig = {
     {
       resolve: 'gatsby-plugin-manifest',
       options: {
-        name: 'Митигация бизнес-рисков',
-        short_name: 'БизнесРиски',
+        name: 'Риски бизнеса — Точка Банк',
+        short_name: 'Риски бизнеса',
         start_url: '/',
-        background_color: '#0A1628',
-        theme_color: '#C9A84C',
+        background_color: '#FFFFFF',
+        theme_color: '#7C3AED',
         display: 'standalone',
         icon: 'src/images/icon.png',
       },

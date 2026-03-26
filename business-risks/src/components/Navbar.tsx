@@ -1,45 +1,66 @@
-import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
+import React, { useState, useEffect } from 'react'
+import styled, { css } from 'styled-components'
 
-interface NavbarWrapperProps {
-  $scrolled: boolean
+interface NavbarProps {
+  onCtaClick: () => void
 }
 
-const NavbarWrapper = styled.nav<NavbarWrapperProps>`
+const Nav = styled.nav<{ $scrolled: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  padding: 1.25rem 2rem;
-  background: ${({ $scrolled, theme }) =>
-    $scrolled ? `${theme.colors.bgDeep}F0` : 'transparent'};
-  border-bottom: 1px solid ${({ $scrolled, theme }) =>
-    $scrolled ? theme.colors.border : 'transparent'};
-  backdrop-filter: ${({ $scrolled }) => ($scrolled ? 'blur(12px)' : 'none')};
-  transition: all 0.3s ease;
+  padding: 0 2rem;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  transition: all 0.3s ease;
+
+  ${({ $scrolled }) => $scrolled && css`
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+  `}
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
 `
 
 const Logo = styled.a`
-  font-family: ${({ theme }) => theme.fonts.serif};
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: ${({ theme }) => theme.fonts.heading};
   font-weight: 700;
-  color: ${({ theme }) => theme.colors.white};
+  font-size: 1.1rem;
+  color: ${({ theme }) => theme.colors.gray900};
   text-decoration: none;
-  letter-spacing: 0.04em;
 
   span {
-    color: ${({ theme }) => theme.colors.gold};
+    color: ${({ theme }) => theme.colors.primary};
   }
+`
+
+const LogoDot = styled.div`
+  width: 28px;
+  height: 28px;
+  background: ${({ theme }) => theme.colors.primary};
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 900;
 `
 
 const NavLinks = styled.div`
   display: flex;
-  gap: 2rem;
   align-items: center;
+  gap: 2rem;
 
   @media (max-width: 768px) {
     display: none;
@@ -47,58 +68,61 @@ const NavLinks = styled.div`
 `
 
 const NavLink = styled.a`
-  font-family: ${({ theme }) => theme.fonts.narrow};
-  font-size: 0.78rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.textSub};
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.gray700};
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.gold};
+    color: ${({ theme }) => theme.colors.primary};
   }
 `
 
-const CTABtn = styled.a`
-  font-family: ${({ theme }) => theme.fonts.narrow};
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.bgDeep};
-  background: ${({ theme }) => theme.colors.gold};
+const NavCta = styled.button`
+  background: ${({ theme }) => theme.colors.primary};
+  color: white;
+  border: none;
+  border-radius: ${({ theme }) => theme.radius.full};
   padding: 0.5rem 1.25rem;
-  text-decoration: none;
-  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  font-family: ${({ theme }) => theme.fonts.body};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.goldLight};
+    background: ${({ theme }) => theme.colors.primaryDark};
+    transform: translateY(-1px);
   }
 `
 
-const Navbar: React.FC = () => {
-  const [scrolled, setScrolled] = useState(false)
+const Navbar: React.FC<NavbarProps> = ({ onCtaClick }) => {
+  const [scrolled, setScrolled] = useState<boolean>(false)
 
   useEffect(() => {
-    const onScroll = (): void => setScrolled(window.scrollY > 60)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const handleScroll = (): void => {
+      setScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
-    <NavbarWrapper $scrolled={scrolled}>
-      <Logo href="#top">
-        Бизнес<span>Риски</span>
+    <Nav $scrolled={scrolled}>
+      <Logo href="/">
+        <LogoDot>Т</LogoDot>
+        Точка <span>Риски</span>
       </Logo>
       <NavLinks>
-        <NavLink href="#risks">Риски</NavLink>
-        <NavLink href="#quiz">Диагностика</NavLink>
-        <NavLink href="#methodology">Методология</NavLink>
-        <NavLink href="#cases">Кейсы</NavLink>
-        <CTABtn href="#consult">Консультация</CTABtn>
+        <NavLink href="#products">Продукты</NavLink>
+        <NavLink href="#operations">Операции</NavLink>
+        <NavLink href="#counterparties">Контрагенты</NavLink>
+        <NavLink href="#formats">Тарифы</NavLink>
+        <NavLink href="#faq">FAQ</NavLink>
       </NavLinks>
-    </NavbarWrapper>
+      <NavCta onClick={onCtaClick}>Подключить</NavCta>
+    </Nav>
   )
 }
 

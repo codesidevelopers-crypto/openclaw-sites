@@ -1,79 +1,53 @@
 import React from 'react'
 import styled from 'styled-components'
 
-const FooterWrapper = styled.footer`
-  background: ${({ theme }) => theme.colors.bgDeep};
-  border-top: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 3rem 2rem;
+const Foot = styled.footer`
+  background: ${({ theme }) => theme.colors.gray900};
+  color: rgba(255,255,255,0.6);
+  padding: 2.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.7;
 `
 
-const Container = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
+const LogoRow = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 `
 
-const Logo = styled.div`
-  font-family: ${({ theme }) => theme.fonts.serif};
-  font-size: 1rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.white};
-  letter-spacing: 0.04em;
-
-  span {
-    color: ${({ theme }) => theme.colors.gold};
-  }
-`
-
-const Nav = styled.nav`
+const LogoDot = styled.div`
+  width: 28px;
+  height: 28px;
+  background: ${({ theme }) => theme.colors.primary};
+  border-radius: 8px;
   display: flex;
-  gap: 2rem;
-
-  @media (max-width: 600px) {
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 900;
+  font-family: ${({ theme }) => theme.fonts.heading};
 `
 
-const NavLink = styled.a`
-  font-size: 0.82rem;
-  color: ${({ theme }) => theme.colors.textMuted};
-  text-decoration: none;
-  transition: color 0.2s ease;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-family: ${({ theme }) => theme.fonts.narrow};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.gold};
-  }
-`
-
-const Copyright = styled.div`
-  font-size: 0.78rem;
-  color: ${({ theme }) => theme.colors.textMuted};
+const LogoText = styled.span`
+  font-family: ${({ theme }) => theme.fonts.heading};
+  font-weight: 700;
+  color: white;
+  font-size: 1rem;
 `
 
 const Footer: React.FC = () => (
-  <FooterWrapper>
-    <Container>
-      <Logo>
-        Бизнес<span>Риски</span>.рф
-      </Logo>
-      <Nav>
-        <NavLink href="#risks">Риски</NavLink>
-        <NavLink href="#quiz">Диагностика</NavLink>
-        <NavLink href="#methodology">Методология</NavLink>
-        <NavLink href="#cases">Кейсы</NavLink>
-        <NavLink href="#consult">Консультация</NavLink>
-      </Nav>
-      <Copyright>© 2026. Все права защищены.</Copyright>
-    </Container>
-  </FooterWrapper>
+  <Foot>
+    <LogoRow>
+      <LogoDot>Т</LogoDot>
+      <LogoText>Точка Банк — Риски бизнеса</LogoText>
+    </LogoRow>
+    <p>© {new Date().getFullYear()} АО «Банк Точка». Все права защищены.</p>
+    <p>Использование сервиса регулируется условиями обслуживания банка.</p>
+  </Foot>
 )
 
 export default Footer

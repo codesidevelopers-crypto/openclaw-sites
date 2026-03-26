@@ -1,312 +1,363 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import styled, { keyframes } from 'styled-components'
 
-const fadeUp = keyframes`
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
+interface HeroProps {
+  onCtaClick: () => void
+}
+
+const float = keyframes`
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 `
 
-const shimmer = keyframes`
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-`
-
-const Wrapper = styled.section`
-  position: relative;
+const Section = styled.section`
   min-height: 100vh;
+  background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 40%, #FFFFFF 100%);
   display: flex;
   align-items: center;
+  padding: 7rem 2rem 4rem;
   overflow: hidden;
-  background: ${({ theme }) => theme.colors.bgDeep};
-`
-
-const BgImage = styled.div`
-  position: absolute;
-  inset: 0;
-  background-image: url('/images/hero.jpg');
-  background-size: cover;
-  background-position: center;
-  filter: brightness(0.25) saturate(0.6);
-  transform: scale(1.05);
-  transition: transform 0.5s ease;
-`
-
-const GridOverlay = styled.div`
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
-`
-
-const GradientOverlay = styled.div`
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(6,14,26,0.9) 0%,
-    rgba(10,22,40,0.7) 50%,
-    rgba(6,14,26,0.95) 100%
-  );
-  pointer-events: none;
-`
-
-const GoldLine = styled.div`
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    ${({ theme }) => theme.colors.gold} 20%,
-    ${({ theme }) => theme.colors.goldLight} 50%,
-    ${({ theme }) => theme.colors.gold} 80%,
-    transparent 100%
-  );
-`
-
-const Content = styled.div`
   position: relative;
-  z-index: 2;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 6rem 1rem 3rem;
+    min-height: auto;
+  }
+`
+
+const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
-  padding-left: 4rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
 `
+
+const Left = styled.div``
 
 const Badge = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid ${({ theme }) => theme.colors.borderGold};
-  background: ${({ theme }) => theme.colors.goldDim};
-  color: ${({ theme }) => theme.colors.goldLight};
-  font-family: ${({ theme }) => theme.fonts.narrow};
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+  background: ${({ theme }) => theme.colors.primaryLight};
+  color: ${({ theme }) => theme.colors.primaryDark};
+  border-radius: ${({ theme }) => theme.radius.full};
   padding: 0.4rem 1rem;
-  margin-bottom: 2rem;
-  animation: ${fadeUp} 0.8s ease both;
-  animation-delay: 0.1s;
-
-  &::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: ${({ theme }) => theme.colors.gold};
-    border-radius: 50%;
-  }
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
 `
 
 const Title = styled.h1`
-  font-size: clamp(2.4rem, 5vw, 4.2rem);
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.fonts.heading};
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 900;
+  color: ${({ theme }) => theme.colors.gray900};
   line-height: 1.15;
-  max-width: 760px;
-  margin-bottom: 1.5rem;
-  animation: ${fadeUp} 0.8s ease both;
-  animation-delay: 0.25s;
+  margin-bottom: 1.25rem;
 
-  em {
-    font-style: normal;
-    background: linear-gradient(
-      90deg,
-      ${({ theme }) => theme.colors.gold},
-      ${({ theme }) => theme.colors.goldLight},
-      ${({ theme }) => theme.colors.gold}
-    );
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: ${shimmer} 3s linear infinite;
+  span {
+    color: ${({ theme }) => theme.colors.primary};
   }
 `
 
 const Subtitle = styled.p`
-  font-size: clamp(1rem, 1.8vw, 1.2rem);
-  color: ${({ theme }) => theme.colors.textSub};
-  max-width: 580px;
+  font-size: 1.15rem;
+  color: ${({ theme }) => theme.colors.gray600};
   line-height: 1.7;
+  margin-bottom: 2rem;
+  max-width: 520px;
+`
+
+const Benefits = styled.ul`
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   margin-bottom: 2.5rem;
-  animation: ${fadeUp} 0.8s ease both;
-  animation-delay: 0.4s;
 `
 
-const Stats = styled.div`
-  display: flex;
-  gap: 3rem;
-  margin-bottom: 3rem;
-  animation: ${fadeUp} 0.8s ease both;
-  animation-delay: 0.55s;
-
-  @media (max-width: 600px) {
-    gap: 1.5rem;
-    flex-wrap: wrap;
-  }
-`
-
-const StatItem = styled.div`
-  border-left: 2px solid ${({ theme }) => theme.colors.borderGold};
-  padding-left: 1rem;
-`
-
-const StatNumber = styled.div`
-  font-family: ${({ theme }) => theme.fonts.serif};
-  font-size: 2rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.gold};
-  line-height: 1;
-`
-
-const StatLabel = styled.div`
-  font-size: 0.78rem;
-  color: ${({ theme }) => theme.colors.textMuted};
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-top: 0.25rem;
-`
-
-const CTARow = styled.div`
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  animation: ${fadeUp} 0.8s ease both;
-  animation-delay: 0.7s;
-
-  @media (max-width: 500px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-`
-
-const CTAButton = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: ${({ theme }) => theme.colors.gold};
-  color: ${({ theme }) => theme.colors.bgDeep};
-  font-family: ${({ theme }) => theme.fonts.serif};
-  font-weight: 700;
-  font-size: 1rem;
-  padding: 0.9rem 2.2rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  letter-spacing: 0.02em;
-  text-decoration: none;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.goldLight};
-    transform: translateY(-2px);
-    box-shadow: ${({ theme }) => theme.shadow.gold};
-  }
-
-  &::after {
-    content: '→';
-    transition: transform 0.2s ease;
-  }
-
-  &:hover::after {
-    transform: translateX(4px);
-  }
-`
-
-const CTASecondary = styled.a`
-  color: ${({ theme }) => theme.colors.textSub};
-  font-size: 0.9rem;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none;
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.gold};
-    border-color: ${({ theme }) => theme.colors.borderGold};
-  }
-`
-
-const ScrollIndicator = styled.div`
-  position: absolute;
-  bottom: 2.5rem;
-  left: 4rem;
+const Benefit = styled.li`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: ${({ theme }) => theme.colors.textMuted};
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  animation: ${fadeUp} 1s ease both;
-  animation-delay: 1.2s;
+  font-size: 1rem;
+  color: ${({ theme }) => theme.colors.gray700};
+  font-weight: 500;
+`
 
-  &::before {
-    content: '';
-    display: block;
-    width: 32px;
-    height: 1px;
-    background: ${({ theme }) => theme.colors.borderGold};
+const BenefitIcon = styled.span`
+  width: 24px;
+  height: 24px;
+  background: ${({ theme }) => theme.colors.greenLight};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  color: ${({ theme }) => theme.colors.green};
+  font-weight: 700;
+`
+
+const Buttons = styled.div`
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+`
+
+const PrimaryBtn = styled.button`
+  background: ${({ theme }) => theme.colors.primary};
+  color: white;
+  border: none;
+  border-radius: ${({ theme }) => theme.radius.full};
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: ${({ theme }) => theme.fonts.body};
+  box-shadow: ${({ theme }) => theme.shadow.purple};
+  transition: all 0.2s;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primaryDark};
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(124,58,237,0.3);
   }
 `
 
-const Hero: React.FC = () => {
-  const bgRef = useRef<HTMLDivElement>(null)
+const SecondaryBtn = styled.a`
+  border: 1.5px solid ${({ theme }) => theme.colors.gray300};
+  background: white;
+  color: ${({ theme }) => theme.colors.gray700};
+  border-radius: ${({ theme }) => theme.radius.full};
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: ${({ theme }) => theme.fonts.body};
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s;
+  text-decoration: none;
 
-  useEffect(() => {
-    const handleScroll = (): void => {
-      if (bgRef.current) {
-        const scrolled = window.scrollY
-        bgRef.current.style.transform = `scale(1.05) translateY(${scrolled * 0.3}px)`
-      }
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primary};
+  }
+`
 
-  return (
-    <Wrapper id="top">
-      <BgImage ref={bgRef} style={{ backgroundImage: "url('/images/hero.jpg')" }} />
-      <GridOverlay />
-      <GradientOverlay />
-      <GoldLine />
-      <Content>
-        <Badge>Профессиональное управление рисками</Badge>
+const Right = styled.div`
+  display: flex;
+  justify-content: center;
+
+  @media (max-width: 968px) {
+    display: none;
+  }
+`
+
+const Dashboard = styled.div`
+  background: white;
+  border-radius: ${({ theme }) => theme.radius.xxl};
+  padding: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadow.xl};
+  width: 360px;
+  animation: ${float} 4s ease-in-out infinite;
+`
+
+const DashHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+`
+
+const DashTitle = styled.span`
+  font-family: ${({ theme }) => theme.fonts.heading};
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.gray900};
+`
+
+const RiskBadge = styled.span<{ $level: 'low' | 'medium' | 'high' }>`
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: ${({ theme }) => theme.radius.full};
+  background: ${({ $level, theme }) =>
+    $level === 'low' ? theme.colors.greenLight :
+    $level === 'medium' ? theme.colors.yellowLight :
+    theme.colors.redLight};
+  color: ${({ $level, theme }) =>
+    $level === 'low' ? theme.colors.green :
+    $level === 'medium' ? theme.colors.yellow :
+    theme.colors.red};
+`
+
+const RiskMeter = styled.div`
+  margin-bottom: 1.25rem;
+`
+
+const MeterLabel = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.gray500};
+  margin-bottom: 0.5rem;
+`
+
+const MeterBar = styled.div`
+  height: 8px;
+  background: ${({ theme }) => theme.colors.gray100};
+  border-radius: ${({ theme }) => theme.radius.full};
+  overflow: hidden;
+`
+
+const MeterFill = styled.div<{ $pct: number; $color: string }>`
+  height: 100%;
+  width: ${({ $pct }) => $pct}%;
+  background: ${({ $color }) => $color};
+  border-radius: ${({ theme }) => theme.radius.full};
+`
+
+const DashItems = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`
+
+const DashItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: ${({ theme }) => theme.colors.gray50};
+  border-radius: ${({ theme }) => theme.radius.md};
+`
+
+const ItemDot = styled.div<{ $color: string }>`
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: ${({ $color }) => $color};
+  flex-shrink: 0;
+`
+
+const ItemText = styled.div`
+  flex: 1;
+`
+
+const ItemName = styled.div`
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.gray800};
+`
+
+const ItemDesc = styled.div`
+  font-size: 0.7rem;
+  color: ${({ theme }) => theme.colors.gray500};
+`
+
+const Hero: React.FC<HeroProps> = ({ onCtaClick }) => (
+  <Section id="hero">
+    <Container>
+      <Left>
+        <Badge>🛡️ Сервис Точка Банк</Badge>
         <Title>
-          Защита вашего бизнеса<br />
-          от <em>критических рисков</em>
+          Контролируй риски бизнеса —{' '}
+          <span>заранее</span>, не в последний момент
         </Title>
         <Subtitle>
-          Каждый третий бизнес в России закрывается из-за рисков, которые можно было предотвратить.
-          Мы помогаем выявить уязвимости и выстроить систему защиты — прежде чем они станут проблемой.
+          «Риски бизнеса» помогает видеть риски по 115-ФЗ, контрагентам
+          и юридическим событиям до того, как они стали проблемой.
+          Спокойнее работайте, уверенно принимайте решения.
         </Subtitle>
-        <Stats>
-          <StatItem>
-            <StatNumber>73%</StatNumber>
-            <StatLabel>МСБ не имеют<br />плана митигации</StatLabel>
-          </StatItem>
-          <StatItem>
-            <StatNumber>6</StatNumber>
-            <StatLabel>Ключевых зон<br />риска</StatLabel>
-          </StatItem>
-          <StatItem>
-            <StatNumber>14 дней</StatNumber>
-            <StatLabel>До первых<br />результатов</StatLabel>
-          </StatItem>
-        </Stats>
-        <CTARow>
-          <CTAButton href="#quiz">Пройти диагностику</CTAButton>
-          <CTASecondary href="#risks">Узнать о рисках</CTASecondary>
-        </CTARow>
-      </Content>
-      <ScrollIndicator>Прокрутите вниз</ScrollIndicator>
-    </Wrapper>
-  )
-}
+        <Benefits>
+          <Benefit>
+            <BenefitIcon>✓</BenefitIcon>
+            Предупреждает до операции — не после блокировки
+          </Benefit>
+          <Benefit>
+            <BenefitIcon>✓</BenefitIcon>
+            Проверяет контрагентов за секунды, безлимитно
+          </Benefit>
+          <Benefit>
+            <BenefitIcon>✓</BenefitIcon>
+            Сообщает о судах, проверках и ФССП первым
+          </Benefit>
+        </Benefits>
+        <Buttons>
+          <PrimaryBtn onClick={onCtaClick}>Подключить сервис</PrimaryBtn>
+          <SecondaryBtn href="#products">Узнать подробнее →</SecondaryBtn>
+        </Buttons>
+      </Left>
+      <Right>
+        <Dashboard>
+          <DashHeader>
+            <DashTitle>Риски бизнеса</DashTitle>
+            <RiskBadge $level="low">Низкий риск</RiskBadge>
+          </DashHeader>
+          <RiskMeter>
+            <MeterLabel>
+              <span>Уровень риска по счёту</span>
+              <span>23%</span>
+            </MeterLabel>
+            <MeterBar>
+              <MeterFill $pct={23} $color="#10B981" />
+            </MeterBar>
+          </RiskMeter>
+          <DashItems>
+            <DashItem>
+              <ItemDot $color="#10B981" />
+              <ItemText>
+                <ItemName>Операции за месяц</ItemName>
+                <ItemDesc>Всё в норме · рекомендации выполнены</ItemDesc>
+              </ItemText>
+            </DashItem>
+            <DashItem>
+              <ItemDot $color="#F59E0B" />
+              <ItemText>
+                <ItemName>Контрагент ООО «Старт»</ItemName>
+                <ItemDesc>Обнаружены признаки риска · проверить</ItemDesc>
+              </ItemText>
+            </DashItem>
+            <DashItem>
+              <ItemDot $color="#10B981" />
+              <ItemText>
+                <ItemName>Надзорные органы</ItemName>
+                <ItemDesc>Новых проверок не запланировано</ItemDesc>
+              </ItemText>
+            </DashItem>
+            <DashItem>
+              <ItemDot $color="#10B981" />
+              <ItemText>
+                <ItemName>Арбитражные дела</ItemName>
+                <ItemDesc>Новых исков нет</ItemDesc>
+              </ItemText>
+            </DashItem>
+          </DashItems>
+        </Dashboard>
+      </Right>
+    </Container>
+  </Section>
+)
 
 export default Hero

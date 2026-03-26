@@ -1,26 +1,54 @@
-import React from 'react'
-import type { HeadFC, PageProps } from 'gatsby'
+import React, { useState } from 'react'
+import type { HeadFC } from 'gatsby'
 import Navbar from '../components/Navbar'
 import Hero from '../components/Hero'
-import RiskModules from '../components/RiskModules'
-import RiskQuiz from '../components/RiskQuiz'
-import Methodology from '../components/Methodology'
-import Cases from '../components/Cases'
-import ConsultForm from '../components/ConsultForm'
+import WhatItDoes from '../components/WhatItDoes'
+import Products from '../components/Products'
+import OperationsDetail from '../components/OperationsDetail'
+import CounterpartyDetail from '../components/CounterpartyDetail'
+import LegalRisks from '../components/LegalRisks'
+import NewFeatures from '../components/NewFeatures'
+import Formats from '../components/Formats'
+import Scenarios from '../components/Scenarios'
+import WhyTochka from '../components/WhyTochka'
+import FAQ from '../components/FAQ'
+import FinalCTA from '../components/FinalCTA'
 import Footer from '../components/Footer'
+import Modal from '../components/Modal'
 
-const IndexPage: React.FC<PageProps> = () => {
+const IndexPage: React.FC = () => {
+  const [modalOpen, setModalOpen] = useState<boolean>(false)
+  const [modalSource, setModalSource] = useState<string>('Не указано')
+
+  const openModal = (source: string = 'Общий интерес'): void => {
+    setModalSource(source)
+    setModalOpen(true)
+  }
+
   return (
-    <main>
-      <Navbar />
-      <Hero />
-      <RiskModules />
-      <RiskQuiz />
-      <Methodology />
-      <Cases />
-      <ConsultForm />
+    <>
+      <Navbar onCtaClick={() => openModal('Navbar')} />
+      <main>
+        <Hero onCtaClick={() => openModal('Hero')} />
+        <WhatItDoes />
+        <Products onCtaClick={openModal} />
+        <OperationsDetail onCtaClick={openModal} />
+        <CounterpartyDetail onCtaClick={openModal} />
+        <LegalRisks onCtaClick={openModal} />
+        <NewFeatures />
+        <Formats onCtaClick={openModal} />
+        <Scenarios onCtaClick={openModal} />
+        <WhyTochka />
+        <FAQ />
+        <FinalCTA onCtaClick={openModal} />
+      </main>
       <Footer />
-    </main>
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        source={modalSource}
+      />
+    </>
   )
 }
 
@@ -28,11 +56,7 @@ export default IndexPage
 
 export const Head: HeadFC = () => (
   <>
-    <title>Митигация бизнес-рисков | Защита вашего бизнеса</title>
-    <meta
-      name="description"
-      content="Профессиональный анализ и митигация рисков малого и среднего бизнеса в России. Диагностика, консультации, защита от финансовых, юридических и операционных рисков."
-    />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Риски бизнеса — Точка Банк</title>
+    <meta name="description" content="Сервис управления рисками бизнеса от Точка Банк. Риски по операциям, контрагентам, юридические события — всё в одном окне вашего интернет-банка." />
   </>
 )

@@ -1,54 +1,46 @@
 import React from 'react'
-import type { HeadFC, PageProps } from 'gatsby'
+import type { HeadFC } from 'gatsby'
 import styled from 'styled-components'
 
 const Wrapper = styled.div`
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  gap: 1.5rem;
-  background: ${({ theme }) => theme.colors.bg};
   text-align: center;
   padding: 2rem;
+  background: ${({ theme }) => theme.colors.primaryLighter};
 `
 
 const Code = styled.div`
-  font-family: ${({ theme }) => theme.fonts.serif};
+  font-family: ${({ theme }) => theme.fonts.heading};
   font-size: 6rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.gold};
-  opacity: 0.5;
+  font-weight: 900;
+  color: ${({ theme }) => theme.colors.primary};
+  opacity: 0.3;
   line-height: 1;
+  margin-bottom: 1rem;
 `
 
 const Title = styled.h1`
+  font-family: ${({ theme }) => theme.fonts.heading};
   font-size: 1.5rem;
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.gray900};
+  margin-bottom: 1rem;
 `
 
 const Link = styled.a`
-  font-family: ${({ theme }) => theme.fonts.narrow};
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.gold};
-  text-decoration: none;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.borderGold};
-  padding-bottom: 2px;
-  transition: opacity 0.2s ease;
-
-  &:hover {
-    opacity: 0.75;
-  }
+  color: ${({ theme }) => theme.colors.primary};
+  font-weight: 600;
+  text-decoration: underline;
 `
 
-const NotFoundPage: React.FC<PageProps> = () => (
+const NotFoundPage: React.FC = () => (
   <Wrapper>
     <Code>404</Code>
     <Title>Страница не найдена</Title>
-    <Link href="/">Вернуться на главную</Link>
+    <Link href="/">Вернуться на главную →</Link>
   </Wrapper>
 )
 

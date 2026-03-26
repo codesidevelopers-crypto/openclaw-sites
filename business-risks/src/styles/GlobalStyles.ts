@@ -8,40 +8,51 @@ const GlobalStyles = createGlobalStyle`
   }
 
   html {
-    scroll-behavior: smooth;
     font-size: 16px;
+    scroll-behavior: smooth;
   }
 
   body {
-    background-color: ${({ theme }) => theme.colors.bg};
-    color: ${({ theme }) => theme.colors.text};
-    font-family: ${({ theme }) => theme.fonts.sans};
-    line-height: 1.7;
+    font-family: ${({ theme }) => theme.fonts.body};
+    color: ${({ theme }) => theme.colors.gray900};
+    background: ${({ theme }) => theme.colors.white};
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
   }
 
-  h1, h2, h3, h4 {
-    font-family: ${({ theme }) => theme.fonts.serif};
-    line-height: 1.25;
-    color: ${({ theme }) => theme.colors.white};
+  h1, h2, h3, h4, h5, h6 {
+    font-family: ${({ theme }) => theme.fonts.heading};
+    line-height: 1.2;
+    font-weight: 700;
   }
 
   a {
-    color: ${({ theme }) => theme.colors.gold};
+    color: inherit;
     text-decoration: none;
   }
 
-  ::selection {
-    background: ${({ theme }) => theme.colors.gold};
-    color: ${({ theme }) => theme.colors.bg};
+  button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: ${({ theme }) => theme.fonts.body};
   }
 
-  @keyframes fadeUp {
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  ::selection {
+    background: ${({ theme }) => theme.colors.primaryLight};
+    color: ${({ theme }) => theme.colors.primaryDark};
+  }
+
+  @keyframes fadeInUp {
     from {
       opacity: 0;
-      transform: translateY(32px);
+      transform: translateY(24px);
     }
     to {
       opacity: 1;
@@ -54,19 +65,8 @@ const GlobalStyles = createGlobalStyle`
     to { opacity: 1; }
   }
 
-  @keyframes shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-
-  @keyframes countUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  .animate-in {
+    animation: fadeInUp 0.6s ease forwards;
   }
 `
 
