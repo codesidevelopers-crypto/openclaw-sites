@@ -43,7 +43,7 @@ const Subtitle = styled.p`
   color: ${({ theme }) => theme.colors.gray600};
   margin-bottom: 3rem;
   text-align: center;
-  max-width: 540px;
+  max-width: 640px;
   margin-left: auto;
   margin-right: auto;
   line-height: 1.7;
@@ -101,6 +101,7 @@ const PriceRow = styled.div`
   align-items: baseline;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+  flex-wrap: wrap;
 `
 
 const Price = styled.div<{ $featured?: boolean }>`
@@ -113,7 +114,6 @@ const Price = styled.div<{ $featured?: boolean }>`
 
 const PriceUnit = styled.span<{ $featured?: boolean }>`
   font-size: 0.875rem;
-  color: ${({ $featured }) => $featured ? 'rgba(255,255,255,0.7)' : undefined};
   color: ${({ $featured, theme }) => $featured ? 'rgba(255,255,255,0.7)' : theme.colors.gray500};
 `
 
@@ -156,11 +156,21 @@ const FeatureItem = styled.li<{ $featured?: boolean }>`
 
   &::before {
     content: '✓';
-    color: ${({ $featured }) => $featured ? '#A5F3FC' : undefined};
     color: ${({ $featured, theme }) => $featured ? '#A5F3FC' : theme.colors.primary};
     font-weight: 700;
     flex-shrink: 0;
   }
+`
+
+const Warning = styled.div<{ $featured?: boolean }>`
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  padding: 0.8rem 1rem;
+  border-radius: ${({ theme }) => theme.radius.lg};
+  margin-bottom: 1rem;
+  background: ${({ $featured, theme }) => $featured ? 'rgba(255,255,255,0.16)' : '#FEF3C7'};
+  color: ${({ $featured, theme }) => $featured ? 'white' : '#92400E'};
 `
 
 const Btn = styled.button<{ $featured?: boolean }>`
@@ -184,19 +194,166 @@ const Btn = styled.button<{ $featured?: boolean }>`
 
 const Note = styled.p`
   text-align: center;
-  font-size: 0.825rem;
-  color: ${({ theme }) => theme.colors.gray500};
+  font-size: 0.9rem;
+  color: ${({ theme }) => theme.colors.gray600};
   margin-top: 1.5rem;
+  line-height: 1.7;
 `
+
+const ConstructorTable = styled.div`
+  margin-top: 3rem;
+  background: ${({ theme }) => theme.colors.gray50};
+  border: 1px solid ${({ theme }) => theme.colors.gray200};
+  border-radius: ${({ theme }) => theme.radius.xxl};
+  overflow: hidden;
+`
+
+const TableHeader = styled.div`
+  padding: 1.5rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`
+
+const TableTitle = styled.h3`
+  font-family: ${({ theme }) => theme.fonts.heading};
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: ${({ theme }) => theme.colors.gray900};
+`
+
+const TableSubtitle = styled.p`
+  font-size: 0.95rem;
+  color: ${({ theme }) => theme.colors.gray600};
+  line-height: 1.6;
+`
+
+const PriceGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const PriceItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid ${({ theme }) => theme.colors.gray200};
+`
+
+const PriceName = styled.span`
+  font-size: 0.95rem;
+  color: ${({ theme }) => theme.colors.gray800};
+`
+
+const PriceValue = styled.span`
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.gray900};
+  white-space: nowrap;
+`
+
+const InlineNotes = styled.div`
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid ${({ theme }) => theme.colors.gray200};
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const MiniCard = styled.div`
+  background: white;
+  border: 1px solid ${({ theme }) => theme.colors.gray200};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  padding: 1rem;
+`
+
+const MiniTitle = styled.div`
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.gray900};
+  margin-bottom: 0.5rem;
+`
+
+const MiniText = styled.p`
+  font-size: 0.85rem;
+  color: ${({ theme }) => theme.colors.gray600};
+  line-height: 1.6;
+`
+
+const QuickConnect = styled.div`
+  margin-top: 1.5rem;
+  background: ${({ theme }) => theme.colors.primaryLighter};
+  border: 1px solid ${({ theme }) => theme.colors.primaryLight};
+  border-radius: ${({ theme }) => theme.radius.xxl};
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`
+
+const QuickText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+`
+
+const QuickLabel = styled.span`
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.primary};
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+`
+
+const QuickTitle = styled.h3`
+  font-family: ${({ theme }) => theme.fonts.heading};
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: ${({ theme }) => theme.colors.gray900};
+`
+
+const QuickDesc = styled.p`
+  font-size: 0.9rem;
+  color: ${({ theme }) => theme.colors.gray700};
+  line-height: 1.6;
+  max-width: 680px;
+`
+
+const constructorPrices = [
+  ['Риски по операциям, полная версия', '1900 ₽ / месяц'],
+  ['Риски по контрагентам', '1200 ₽ / месяц'],
+  ['Надзорные органы', '300 ₽ / месяц'],
+  ['Арбитражные дела', '300 ₽ / месяц'],
+  ['Судебные дела', '300 ₽ / месяц'],
+  ['Исполнительные производства', '300 ₽ / месяц'],
+  ['Риски по самозанятым', '750 ₽ / месяц'],
+  ['Признаки дробления бизнеса', '750 ₽ / месяц'],
+]
 
 const Formats: React.FC<FormatsProps> = ({ onCtaClick }) => (
   <Section id="formats">
     <Container>
       <SectionLabel>Форматы подключения</SectionLabel>
-      <Title>Выберите подходящий формат</Title>
+      <Title>Подключайте сервис так, как удобно бизнесу</Title>
       <Subtitle>
-        Два формата «Всё включено» или гибкий Конструктор — подберите то,
-        что подходит под задачи вашего бизнеса.
+        Продуктовые модули и тарифы — не одно и то же. Модули отвечают за конкретные
+        задачи, а формат подключения определяет, как вы покупаете доступ: всё сразу
+        или только нужные части.
       </Subtitle>
       <Grid>
         <Card>
@@ -205,15 +362,15 @@ const Formats: React.FC<FormatsProps> = ({ onCtaClick }) => (
             <Price>3 000 ₽</Price>
             <PriceUnit>/ месяц</PriceUnit>
           </PriceRow>
-          <CardSubtitle>Все 8 модулей одной подпиской. Платите помесячно — без обязательств.</CardSubtitle>
+          <CardSubtitle>Все 8 продуктовых модулей одной подпиской. Подходит тем, кто хочет видеть полную картину рисков и не собирать набор вручную.</CardSubtitle>
           <Divider />
           <FeatureList>
             <FeatureItem>Все 8 продуктовых модулей</FeatureItem>
-            <FeatureItem>Риски по операциям (полная версия)</FeatureItem>
-            <FeatureItem>Безлимитные проверки контрагентов</FeatureItem>
-            <FeatureItem>Юридические модули: все 4</FeatureItem>
-            <FeatureItem>Риски по самозанятым</FeatureItem>
-            <FeatureItem>Признаки дробления бизнеса</FeatureItem>
+            <FeatureItem>Риски по операциям — полная версия</FeatureItem>
+            <FeatureItem>Безлимитные проверки и мониторинг контрагентов</FeatureItem>
+            <FeatureItem>Все 4 юридических и событийных модуля</FeatureItem>
+            <FeatureItem>Риски по самозанятым и признаки дробления</FeatureItem>
+            <FeatureItem>Можно дополнительно использовать безлимит в Проверке компании</FeatureItem>
           </FeatureList>
           <Btn onClick={() => onCtaClick('Всё включено — Месяц')}>
             Подключить за 3 000 ₽/мес
@@ -221,23 +378,23 @@ const Formats: React.FC<FormatsProps> = ({ onCtaClick }) => (
         </Card>
         <Card $featured style={{ marginTop: '-12px' }}>
           <PopularBadge>★ Самый выгодный</PopularBadge>
-          <CardTitle $featured>Всё включено — Год</CardTitle>
+          <CardTitle $featured>Всё включено на год</CardTitle>
           <PriceRow>
             <Price $featured>25 000 ₽</Price>
             <PriceUnit $featured>/ год</PriceUnit>
-            <DiscountBadge>−30%</DiscountBadge>
+            <DiscountBadge>Скидка 30%</DiscountBadge>
           </PriceRow>
           <CardSubtitle $featured>
-            Годовая подписка со скидкой 30% — те же 8 модулей, выгоднее на треть.
+            Это не отдельный продукт, а тот же формат «Всё включено», только при оплате на год.
+            Получаете все 8 модулей и экономите 30%.
           </CardSubtitle>
           <Divider $featured />
           <FeatureList>
-            <FeatureItem $featured>Все 8 продуктовых модулей</FeatureItem>
-            <FeatureItem $featured>Риски по операциям (полная версия)</FeatureItem>
-            <FeatureItem $featured>Безлимитные проверки контрагентов</FeatureItem>
-            <FeatureItem $featured>Юридические модули: все 4</FeatureItem>
-            <FeatureItem $featured>Риски по самозанятым</FeatureItem>
-            <FeatureItem $featured>Признаки дробления бизнеса</FeatureItem>
+            <FeatureItem $featured>Те же 8 продуктовых модулей, что и в месячном формате</FeatureItem>
+            <FeatureItem $featured>Полная версия рисков по операциям и рабочий контур интеграций</FeatureItem>
+            <FeatureItem $featured>Безлимитные проверки контрагентов и мониторинг изменений</FeatureItem>
+            <FeatureItem $featured>Юридические уведомления, самозанятые и дробление бизнеса</FeatureItem>
+            <FeatureItem $featured>Подходит, если хотите закрыть все задачи одним решением</FeatureItem>
           </FeatureList>
           <Btn $featured onClick={() => onCtaClick('Всё включено — Год')}>
             Подключить за 25 000 ₽/год
@@ -246,24 +403,68 @@ const Formats: React.FC<FormatsProps> = ({ onCtaClick }) => (
         <Card>
           <CardTitle>Конструктор</CardTitle>
           <PriceRow>
-            <Price>от модуля</Price>
+            <Price>по модулям</Price>
           </PriceRow>
-          <CardSubtitle>Соберите только те модули, которые нужны вашему бизнесу. Платите за каждый отдельно.</CardSubtitle>
+          <CardSubtitle>Выбираете один или несколько модулей и платите за каждый отдельно. Подходит, если нужно решить конкретную задачу, не покупая весь пакет.</CardSubtitle>
+          <Warning>У Конструктора нет пакетной скидки. Вы платите сумму выбранных модулей. Если позже добавите ещё сервис, возможно пропорциональное досписание до общей даты платежа — это механика расчёта, а не скидка.</Warning>
           <Divider />
           <FeatureList>
-            <FeatureItem>Любая комбинация из 8 модулей</FeatureItem>
-            <FeatureItem>Риски по самозанятым — отдельная подписка</FeatureItem>
-            <FeatureItem>Подключайте и отключайте в любой момент</FeatureItem>
-            <FeatureItem>Единый счёт и управление</FeatureItem>
-            <FeatureItem>Цена — сумма выбранных модулей</FeatureItem>
+            <FeatureItem>Любая комбинация из 8 продуктовых модулей</FeatureItem>
+            <FeatureItem>Стоимость зависит от выбранного набора</FeatureItem>
+            <FeatureItem>Риски по самозанятым можно подключить отдельно и быстро</FeatureItem>
+            <FeatureItem>Подходит, если вам нужен точечный контроль отдельных зон риска</FeatureItem>
           </FeatureList>
           <Btn onClick={() => onCtaClick('Конструктор')}>
-            Собрать конструктор
+            Собрать свой набор
           </Btn>
         </Card>
       </Grid>
+
+      <ConstructorTable>
+        <TableHeader>
+          <TableTitle>Цены модулей в Конструкторе</TableTitle>
+          <TableSubtitle>
+            Конструктор — это набор нужных модулей без пакетной скидки. Ниже — актуальная стоимость каждого модуля.
+          </TableSubtitle>
+        </TableHeader>
+        <PriceGrid>
+          {constructorPrices.map(([name, value]) => (
+            <PriceItem key={name}>
+              <PriceName>{name}</PriceName>
+              <PriceValue>{value}</PriceValue>
+            </PriceItem>
+          ))}
+        </PriceGrid>
+        <InlineNotes>
+          <MiniCard>
+            <MiniTitle>Базовая версия «Рисков по операциям»</MiniTitle>
+            <MiniText>
+              Доступна бесплатно и подключена автоматически всем клиентам Точки. Платной является только полная версия модуля — 1900 ₽ / месяц.
+            </MiniText>
+          </MiniCard>
+          <MiniCard>
+            <MiniTitle>Важно про скидки</MiniTitle>
+            <MiniText>
+              Скидка 30% относится только к годовому формату «Всё включено». В Конструкторе скидки за пакет нет — вы платите только за выбранные модули.
+            </MiniText>
+          </MiniCard>
+        </InlineNotes>
+      </ConstructorTable>
+
+      <QuickConnect>
+        <QuickText>
+          <QuickLabel>Отдельное быстрое подключение</QuickLabel>
+          <QuickTitle>Риски по самозанятым — как самостоятельный модуль</QuickTitle>
+          <QuickDesc>
+            Если сейчас вам важно только безопасно работать с самозанятыми, можно подключить этот модуль отдельно за 750 ₽ / месяц.
+            Это не тариф, а отдельный продуктовый модуль внутри экосистемы «Рисков бизнеса».
+          </QuickDesc>
+        </QuickText>
+        <Btn onClick={() => onCtaClick('Риски по самозанятым — быстрое подключение')}>Подключить модуль</Btn>
+      </QuickConnect>
+
       <Note>
-        Базовая версия «Рисков по операциям» — бесплатно для всех клиентов Точки
+        Сначала выбираете, какие продуктовые модули нужны бизнесу. Потом — способ подключения: «Всё включено», «Всё включено на год» или Конструктор.
       </Note>
     </Container>
   </Section>

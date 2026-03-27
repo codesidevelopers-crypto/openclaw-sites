@@ -20,7 +20,7 @@ const Container = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
-  align-items: center;
+  align-items: start;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -42,7 +42,7 @@ const SectionLabel = styled.div`
 
 const Title = styled.h2`
   font-family: ${({ theme }) => theme.fonts.heading};
-  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-size: clamp(1.6rem, 2.6vw, 2.3rem);
   font-weight: 800;
   color: ${({ theme }) => theme.colors.gray900};
   margin-bottom: 1rem;
@@ -51,8 +51,19 @@ const Title = styled.h2`
 const Description = styled.p`
   font-size: 1rem;
   color: ${({ theme }) => theme.colors.gray700};
-  line-height: 1.7;
-  margin-bottom: 2rem;
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+`
+
+const Accent = styled.div`
+  background: ${({ theme }) => theme.colors.primaryLighter};
+  border: 1px solid ${({ theme }) => theme.colors.primaryLight};
+  border-radius: ${({ theme }) => theme.radius.xl};
+  padding: 1rem 1.1rem;
+  font-size: 0.95rem;
+  color: ${({ theme }) => theme.colors.gray800};
+  line-height: 1.65;
+  margin-bottom: 1.5rem;
 `
 
 const Features = styled.ul`
@@ -60,7 +71,7 @@ const Features = styled.ul`
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 `
 
 const Feature = styled.li`
@@ -84,7 +95,7 @@ const FeatureIcon = styled.div`
 const FeatureText = styled.div``
 
 const FeatureTitle = styled.div`
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
   color: ${({ theme }) => theme.colors.gray900};
   margin-bottom: 0.15rem;
@@ -93,6 +104,28 @@ const FeatureTitle = styled.div`
 const FeatureDesc = styled.div`
   font-size: 0.825rem;
   color: ${({ theme }) => theme.colors.gray600};
+  line-height: 1.6;
+`
+
+const EcosystemCard = styled.div`
+  background: ${({ theme }) => theme.colors.gray50};
+  border: 1px solid ${({ theme }) => theme.colors.gray200};
+  border-radius: ${({ theme }) => theme.radius.xl};
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.5rem;
+`
+
+const EcosystemTitle = styled.div`
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: ${({ theme }) => theme.colors.gray900};
+  margin-bottom: 0.5rem;
+`
+
+const EcosystemText = styled.p`
+  font-size: 0.85rem;
+  color: ${({ theme }) => theme.colors.gray600};
+  line-height: 1.65;
 `
 
 const ConnectBtn = styled.button`
@@ -148,6 +181,17 @@ const SearchBtn = styled.span`
   border-radius: ${({ theme }) => theme.radius.sm};
 `
 
+const TopHint = styled.div`
+  background: ${({ theme }) => theme.colors.primaryLighter};
+  border: 1px solid ${({ theme }) => theme.colors.primaryLight};
+  color: ${({ theme }) => theme.colors.primaryDark};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  padding: 0.8rem 0.95rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  margin-bottom: 1rem;
+`
+
 const ResultCard = styled.div<{ $risk: 'low' | 'medium' | 'high' }>`
   border: 1.5px solid ${({ $risk, theme }) =>
     $risk === 'low' ? theme.colors.greenLight :
@@ -163,6 +207,7 @@ const ResultHeader = styled.div`
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.75rem;
+  gap: 1rem;
 `
 
 const ResultName = styled.div`
@@ -189,19 +234,31 @@ const RiskBadge = styled.span<{ $risk: 'low' | 'medium' | 'high' }>`
     $risk === 'low' ? theme.colors.green :
     $risk === 'medium' ? theme.colors.warning :
     theme.colors.danger};
+  white-space: nowrap;
 `
 
 const ResultSignals = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.35rem;
 `
 
 const Signal = styled.div`
-  font-size: 0.775rem;
+  font-size: 0.79rem;
   color: ${({ theme }) => theme.colors.gray600};
   display: flex;
   gap: 0.4rem;
+  line-height: 1.5;
+`
+
+const DynamicBlock = styled.div`
+  background: ${({ theme }) => theme.colors.gray50};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  padding: 0.9rem 1rem;
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.colors.gray700};
+  line-height: 1.6;
+  margin-top: 0.4rem;
 `
 
 const CounterpartyDetail: React.FC<CounterpartyDetailProps> = ({ onCtaClick }) => (
@@ -214,6 +271,9 @@ const CounterpartyDetail: React.FC<CounterpartyDetailProps> = ({ onCtaClick }) =
             <SearchText>ИНН, ОГРН или название компании</SearchText>
             <SearchBtn>Проверить</SearchBtn>
           </SearchBar>
+          <TopHint>
+            Сначала проверить — потом платить. Сервис показывает сигналы риска ещё до отправки денег и помогает не пропустить тревожные изменения по партнёру.
+          </TopHint>
           <ResultCard $risk="high">
             <ResultHeader>
               <div>
@@ -223,9 +283,10 @@ const CounterpartyDetail: React.FC<CounterpartyDetailProps> = ({ onCtaClick }) =
               <RiskBadge $risk="high">Высокий риск</RiskBadge>
             </ResultHeader>
             <ResultSignals>
-              <Signal>⚠️ Компания в списке ненадёжных контрагентов</Signal>
-              <Signal>⚠️ Массовый адрес регистрации</Signal>
-              <Signal>⚠️ Частая смена учредителей</Signal>
+              <Signal>⚠️ У контрагента ухудшилась деловая репутация и появились новые негативные сигналы</Signal>
+              <Signal>⚠️ Массовый адрес регистрации и частая смена учредителей</Signal>
+              <Signal>⚠️ Есть исполнительные производства — лучше проверить до оплаты</Signal>
+              <Signal>⚠️ Расширенная подсказка в платеже рекомендует запросить документы и отложить перевод</Signal>
             </ResultSignals>
           </ResultCard>
           <ResultCard $risk="medium">
@@ -234,11 +295,12 @@ const CounterpartyDetail: React.FC<CounterpartyDetailProps> = ({ onCtaClick }) =
                 <ResultName>ИП Смирнова Е.В.</ResultName>
                 <ResultInn>ИНН 773456789012</ResultInn>
               </div>
-              <RiskBadge $risk="medium">Средний риск</RiskBadge>
+              <RiskBadge $risk="medium">Динамический риск</RiskBadge>
             </ResultHeader>
             <ResultSignals>
-              <Signal>💡 Зарегистрирована менее 1 года назад</Signal>
-              <Signal>💡 Рекомендуем запросить документы</Signal>
+              <Signal>💡 Профиль риска изменился за последнюю неделю</Signal>
+              <Signal>💡 Рекомендуем проверить досье контрагента перед оплатой</Signal>
+              <Signal>💡 Мониторинг продолжит отслеживать новые события без ограничений</Signal>
             </ResultSignals>
           </ResultCard>
           <ResultCard $risk="low">
@@ -250,25 +312,33 @@ const CounterpartyDetail: React.FC<CounterpartyDetailProps> = ({ onCtaClick }) =
               <RiskBadge $risk="low">Низкий риск</RiskBadge>
             </ResultHeader>
             <ResultSignals>
-              <Signal>✓ Работает 8 лет, нет нарушений</Signal>
+              <Signal>✓ Компания работает 8 лет, без тревожных изменений</Signal>
+              <Signal>✓ Безлимитный мониторинг оставит компанию под наблюдением и предупредит, если профиль риска изменится</Signal>
             </ResultSignals>
           </ResultCard>
+          <DynamicBlock>
+            Риск контрагента меняется динамически. Сегодня партнёр может выглядеть безопасно, а завтра у него появится новый иск, блокировка, смена директора или производство в ФССП. Поэтому важны не только проверки, но и безлимитный мониторинг изменений.
+          </DynamicBlock>
         </MockCard>
       </Left>
       <Right>
         <SectionLabel>Риски по контрагентам</SectionLabel>
-        <Title>Проверяйте партнёров до того, как отправили деньги</Title>
+        <Title>Лучше узнать о риске до перевода денег, а не после</Title>
         <Description>
-          Видьте сигналы риска в момент платежа — не после его проведения.
-          Безлимитные проверки, мониторинг изменений и история — всё это
-          помогает выстраивать безопасные деловые отношения.
+          Модуль помогает проверять контрагентов до сделки, видеть негативные признаки и получать
+          расширенные подсказки прямо в момент платежа. Это не просто разовая проверка по карточке компании,
+          а постоянный мониторинг деловой репутации и изменений у партнёров.
         </Description>
+        <Accent>
+          Сценарий простой: сначала проверить — потом платить. Если у нового или тревожного контрагента
+          меняется профиль риска, сервис предупредит заранее и подскажет следующий шаг.
+        </Accent>
         <Features>
           {[
-            { icon: '⚡', title: 'Проверка до платежа', desc: 'Расширенные подсказки прямо при создании платёжного поручения' },
-            { icon: '🔄', title: 'Мониторинг изменений', desc: 'Уведомления, если что-то поменялось у ваших контрагентов' },
-            { icon: '∞', title: 'Безлимитные проверки', desc: 'Проверяйте любое количество компаний без ограничений' },
-            { icon: '📜', title: 'История изменений', desc: 'Полная хронология всех изменений по каждому контрагенту' },
+            { icon: '⚡', title: 'Проверка до платежа', desc: 'Расширенные подсказки прямо при создании платёжного поручения помогают заметить риск до отправки денег.' },
+            { icon: '🔄', title: 'Безлимитный мониторинг', desc: 'Следите за изменениями без ограничений: новые иски, исполнительные производства, смена адреса, директора и другие сигналы.' },
+            { icon: '∞', title: 'Безлимитные проверки', desc: 'Проверяйте любое количество компаний и ИП, когда подключаете новых партнёров или пересматриваете текущих.' },
+            { icon: '🏷️', title: 'Деловая репутация', desc: 'Сервис собирает негативные признаки, чтобы вы могли оценить надёжность партнёра до сделки, а не после проблем.' },
           ].map(f => (
             <Feature key={f.title}>
               <FeatureIcon>{f.icon}</FeatureIcon>
@@ -279,8 +349,15 @@ const CounterpartyDetail: React.FC<CounterpartyDetailProps> = ({ onCtaClick }) =
             </Feature>
           ))}
         </Features>
+        <EcosystemCard>
+          <EcosystemTitle>Связь с соседними сервисами экосистемы</EcosystemTitle>
+          <EcosystemText>
+            В «Рисках по контрагентам» вы видите сигналы, мониторинг и подсказки в платеже. Если нужно копнуть глубже,
+            можно перейти в «Проверку компании» и «Досье контрагента», чтобы изучить партнёра подробнее и собрать больше фактов до сделки.
+          </EcosystemText>
+        </EcosystemCard>
         <ConnectBtn onClick={() => onCtaClick('Риски по контрагентам')}>
-          Подключить →
+          Подключить модуль
         </ConnectBtn>
       </Right>
     </Container>
