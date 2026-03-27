@@ -3,15 +3,14 @@ import type { HeadFC } from 'gatsby'
 import Navbar from '../components/Navbar'
 import Hero from '../components/Hero'
 import WhatItDoes from '../components/WhatItDoes'
+import WhatVisible from '../components/WhatVisible'
 import Products from '../components/Products'
 import OperationsDetail from '../components/OperationsDetail'
 import CounterpartyDetail from '../components/CounterpartyDetail'
 import LegalRisks from '../components/LegalRisks'
 import NewFeatures from '../components/NewFeatures'
-import Formats from '../components/Formats'
-import Scenarios from '../components/Scenarios'
-import WhyTochka from '../components/WhyTochka'
 import EcosystemServices from '../components/EcosystemServices'
+import Formats from '../components/Formats'
 import ExpertHelp from '../components/ExpertHelp'
 import FAQ from '../components/FAQ'
 import FinalCTA from '../components/FinalCTA'
@@ -33,15 +32,14 @@ const IndexPage: React.FC = () => {
       <main>
         <Hero onCtaClick={() => openModal('Hero')} />
         <WhatItDoes />
+        <WhatVisible />
         <Products onCtaClick={openModal} />
         <OperationsDetail onCtaClick={openModal} />
         <CounterpartyDetail onCtaClick={openModal} />
         <LegalRisks onCtaClick={openModal} />
         <NewFeatures />
-        <Formats onCtaClick={openModal} />
-        <Scenarios onCtaClick={openModal} />
-        <WhyTochka />
         <EcosystemServices onCtaClick={openModal} />
+        <Formats onCtaClick={openModal} />
         <ExpertHelp onCtaClick={openModal} />
         <FAQ />
         <FinalCTA onCtaClick={openModal} />
