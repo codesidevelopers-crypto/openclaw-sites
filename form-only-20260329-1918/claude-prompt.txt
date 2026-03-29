@@ -1,0 +1,28 @@
+Build a small but polished public-facing TEST website in this project directory.
+
+Goal:
+- This is a test site to verify your work.
+- Build a clean Russian-language landing page with these sections:
+  1) hero with clear note that this is a test site
+  2) features / what is being tested
+  3) short process timeline
+  4) contact/test form
+  5) footer
+- Use the established stack: Gatsby + TypeScript + styled-components + typed theme.
+- Avoid any/unsafe typing.
+- Keep the result coherent and actually runnable.
+
+Form requirements:
+- Submit to /api/submit
+- Keep payload flat
+- Use Russian human-readable field keys
+- Include fields like: Имя, Телефон, Комментарий
+- Show success/error states in UI
+
+Implementation requirements:
+- Create all needed project files in this directory.
+- Provide package.json scripts for develop/build.
+- Add a short README with run/build notes.
+- Make the design look intentionally good, not bare scaffold.
+
+At the end, print a concise summary of what you created and QA commands.

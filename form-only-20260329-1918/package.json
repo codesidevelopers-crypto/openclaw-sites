@@ -1,0 +1,27 @@
+{
+  "name": "test-site-20260329",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Тестовый сайт — Gatsby + TypeScript + styled-components",
+  "scripts": {
+    "develop": "gatsby develop",
+    "build": "gatsby build",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "gatsby": "^5.13.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "styled-components": "^6.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "babel-plugin-styled-components": "^2.1.4",
+    "gatsby-plugin-styled-components": "^6.13.1",
+    "typescript": "^5.3.3"
+  }
+}

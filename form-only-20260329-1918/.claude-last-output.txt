@@ -1,0 +1,21 @@
+Чисто. Вот что сделано:
+
+---
+
+**Изменённые файлы:**
+
+| Файл | Действие |
+|------|----------|
+| `src/pages/index.tsx` | Переписан — одна страница, `<Page>` (flex, центр экрана) + `<ContactForm />` |
+| `src/components/ContactForm.tsx` | Переписан — карточка с формой: Имя, Телефон, Сообщение + hidden Источник="Форма сайта"; POST /api/submit; success/error состояния; без `any` |
+| `gatsby-config.ts` | Обновлены `title` и `description` |
+
+**Удалены:**
+- `src/components/Hero.tsx`
+- `src/components/Features.tsx`
+- `src/components/WhyUs.tsx`
+- `src/components/Timeline.tsx`
+- `src/components/Footer.tsx`
+- `src/components/Layout.tsx`
+
+**Результат:** минимальный сайт — одна карточка по центру серого фона. Форма постит JSON на `/api/submit`, после успеха показывает подтверждение, при ошибке — сообщение с деталью. Типизация полная, `any` отсутствует.
