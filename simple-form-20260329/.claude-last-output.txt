@@ -1,0 +1,33 @@
+Готово. Структура проекта:
+
+```
+simple-form-20260329/
+├── package.json
+├── tsconfig.json
+├── gatsby-config.ts
+├── gatsby-browser.tsx          ← wrapRootElement (клиент)
+├── gatsby-ssr.tsx              ← wrapRootElement (SSR)
+├── wrap-root-element.tsx       ← ThemeProvider + GlobalStyle
+└── src/
+    ├── pages/index.tsx         ← единственная страница с формой
+    ├── styles/
+    │   ├── theme.ts            ← типизированная тема (as const)
+    │   └── GlobalStyle.ts      ← глобальные стили
+    └── types/
+        └── styled.d.ts         ← расширение DefaultTheme
+```
+
+**Для запуска:**
+```bash
+npm install
+npm run develop
+```
+
+**Ключевые решения:**
+
+- **Typed theme** — `as const` + `typeof theme` → `DefaultTheme extends Theme`, все `theme.*` в styled-components строго типизированы без `any`
+- **Payload** — плоский объект с русскими ключами: `{ Имя, Телефон, Комментарий, Источник: "simple-form" }`
+- **Submit** — `fetch("/api/submit", { method: "POST" })`, статусы `idle | loading | success | error`
+- **После успеха** — форма заменяется блоком с сообщением об успехе
+- **`inputBase`** — общий `css` для `Input` и `Textarea`, без дублирования
+- **Дизайн** — белая карточка с тенью, синий акцент `#2563eb`, серый фон страницы, один экран

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "module": "CommonJS",
+    "jsx": "react",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "outDir": "./public",
+    "baseUrl": "."
+  },
+  "include": ["src", "gatsby-browser.tsx", "gatsby-ssr.tsx", "gatsby-config.ts", "wrap-root-element.tsx"],
+  "exclude": ["node_modules", "public", ".cache"]
+}
