@@ -1,0 +1,8 @@
+.cache/
+.env
+.env.local
+.env.production
+node_modules/
+public/
+serve*.log
+serve*.pid
