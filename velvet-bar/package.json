@@ -1,0 +1,25 @@
+{
+  "name": "velvet-bar",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "develop": "gatsby develop",
+    "build": "gatsby build",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean"
+  },
+  "dependencies": {
+    "gatsby": "*",
+    "react": "*",
+    "react-dom": "*",
+    "styled-components": "*",
+    "gatsby-plugin-styled-components": "*",
+    "gatsby-plugin-typescript": "*",
+    "gatsby-plugin-google-fonts": "*",
+    "gatsby-plugin-manifest": "*",
+    "gatsby-plugin-image": "*",
+    "gatsby-plugin-sharp": "*",
+    "gatsby-transformer-sharp": "*",
+    "gatsby-source-filesystem": "*"
+  }
+}
