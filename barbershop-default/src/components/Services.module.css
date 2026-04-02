@@ -1,0 +1,48 @@
+.section {
+  background: var(--color-bg-alt);
+}
+
+.grid {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.duration {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+}
+
+.price {
+  font-weight: 700;
+  color: var(--color-accent);
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.cta {
+  text-align: center;
+  margin-top: 2.5rem;
+}
