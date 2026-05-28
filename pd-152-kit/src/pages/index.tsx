@@ -813,12 +813,12 @@ const Container = styled.div<{ narrow?: boolean }>`
 `;
 
 const Section = styled.section`
-  padding-top: 40px;
-  padding-bottom: 40px;
+  padding-top: 32px;
+  padding-bottom: 32px;
 
   @media (max-width: 768px) {
-    padding-top: 32px;
-    padding-bottom: 32px;
+    padding-top: 24px;
+    padding-bottom: 24px;
   }
 `;
 
@@ -828,12 +828,12 @@ const TintSection = styled(Section)`
 
 const HeroSection = styled.section`
   min-height: auto;
-  padding: 64px 0 48px;
+  padding: 56px 0 28px;
   background-image: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37,99,235,.05) 0%, transparent 100%);
 
   @media (max-width: 768px) {
     min-height: auto;
-    padding: 48px 0 64px;
+    padding: 40px 0 20px;
   }
 `;
 
@@ -913,6 +913,10 @@ const HeroVisualWrap = styled.div`
 
   @media (max-width: 960px) {
     margin-top: 8px;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
   }
 `;
 
@@ -1088,7 +1092,7 @@ const TrustText = styled.p<{ $strong?: boolean }>`
 
 const SectionHeader = styled.div`
   max-width: 760px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 `;
 
 const SectionLabel = styled.span`
