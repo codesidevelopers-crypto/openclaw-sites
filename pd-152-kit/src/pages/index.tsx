@@ -36,7 +36,7 @@ type FormMeta = {
   utm_content: string;
   utm_term: string;
   referrer: string;
-  page_url: string;
+  landing_url: string;
 };
 
 type FullFormPayload = StepOneData & StepTwoData & FormMeta;
@@ -48,8 +48,10 @@ type AnalyticsEventName =
   | 'tariff_click'
   | 'form_start'
   | 'form_step_1_submit'
+  | 'form_submit_step1'
   | 'form_step_2_submit'
   | 'form_success'
+  | 'high_intent_lead'
   | 'faq_open'
   | 'final_cta_click';
 
@@ -94,7 +96,7 @@ const buildMeta = (): FormMeta => ({
   utm_content: getUrlParam('utm_content'),
   utm_term: getUrlParam('utm_term'),
   referrer: typeof document !== 'undefined' ? document.referrer : '',
-  page_url: typeof window !== 'undefined' ? window.location.href : '',
+  landing_url: typeof window !== 'undefined' ? window.location.href : '',
 });
 
 const submitLead = async (payload: FullFormPayload): Promise<void> => {
@@ -148,8 +150,9 @@ const processSteps = [
   {
     title: 'Готовый комплект за 7–14 дней',
     text: 'Подготавливаем документы и инструкцию по размещению и дальнейшим шагам.',
+    note: 'Подготовка начинается после оплаты. Оплата — только после согласования состава.',
   },
-];
+] as const;
 
 const pricing = [
   {
@@ -160,7 +163,7 @@ const pricing = [
       'Политика обработки ПДн',
       'Согласие и формулировки для сайта',
       'Рекомендации по размещению',
-      'Черновик уведомления РКН — если применимо',
+      'Уведомление в РКН и инструкция по подаче — при необходимости',
     ],
   },
   {
@@ -174,7 +177,7 @@ const pricing = [
     tier: 'Расширенный' as PricingTier,
     price: 'от 79 900 ₽',
     description: 'Для сложных процессов: несколько сайтов, подрядчики, внешние сервисы.',
-    items: ['Индивидуальная оценка процессов', 'Несколько сайтов или направлений', 'Сложные сценарии передачи данных', 'Индивидуальный расчёт'],
+    items: ['Индивидуальная оценка процессов', 'Несколько сайтов или направлений', 'Сложные сценарии передачи данных'],
   },
 ];
 
@@ -203,7 +206,7 @@ const initialStepOne: StepOneData = {
   email: '',
   website: '',
   inn: '',
-  selectedTariff: 'Не знаю',
+  selectedTariff: '' as PricingTier,
 };
 
 const initialStepTwo: StepTwoData = {
@@ -281,7 +284,7 @@ const IndexPage: React.FC = () => {
     utm_content: '',
     utm_term: '',
     referrer: '',
-    page_url: '',
+    landing_url: '',
   });
   const [startedForm, setStartedForm] = useState(false);
   const [error, setError] = useState('');
@@ -345,7 +348,12 @@ const IndexPage: React.FC = () => {
 
   const handleTariffClick = (tier: PricingTier): void => {
     setStepOne((current) => ({ ...current, selectedTariff: tier }));
-    trackEvent('tariff_click', { tariff: tier });
+    const tariffMap: Record<'Базовый' | 'Стандарт' | 'Расширенный', 'base' | 'standard' | 'extended'> = {
+      Базовый: 'base',
+      Стандарт: 'standard',
+      Расширенный: 'extended',
+    };
+    trackEvent('tariff_click', { tariff: tariffMap[tier as 'Базовый' | 'Стандарт' | 'Расширенный'] });
 
     if (!startedForm) {
       setStartedForm(true);
@@ -389,6 +397,10 @@ const IndexPage: React.FC = () => {
       selected_tariff: stepOne.selectedTariff,
       has_inn: Boolean(stepOne.inn),
     });
+    trackEvent('form_submit_step1', {
+      selected_tariff: stepOne.selectedTariff,
+      has_inn: Boolean(stepOne.inn),
+    });
     setStep(2);
   };
 
@@ -411,6 +423,11 @@ const IndexPage: React.FC = () => {
         selected_tariff: stepOne.selectedTariff,
         payment_intent: stepTwo.paymentIntent,
       });
+      if (stepTwo.paymentIntent === 'yes') {
+        trackEvent('high_intent_lead', {
+          selected_tariff: stepOne.selectedTariff,
+        });
+      }
       setStep(3);
     } catch (submissionError) {
       const message = submissionError instanceof Error ? submissionError.message : 'Не удалось отправить заявку.';
@@ -438,8 +455,8 @@ const IndexPage: React.FC = () => {
                 <PrimaryButton type="button" onClick={() => goToForm('hero_cta_click', 'Получить расчёт')}>
                   Получить расчёт
                 </PrimaryButton>
-                <SecondaryButton type="button" onClick={() => goToForm('hero_cta_click', 'Проверить, что нужно')}>
-                  Проверить, что нужно
+                <SecondaryButton type="button" onClick={() => goToForm('hero_cta_click', 'Посмотреть, что входит ↓')}>
+                  Посмотреть, что входит ↓
                 </SecondaryButton>
               </HeroActions>
               <TrustGrid>
@@ -450,7 +467,7 @@ const IndexPage: React.FC = () => {
                       <TrustIcon>
                         <Icon />
                       </TrustIcon>
-                      <TrustText>{point}</TrustText>
+                      <TrustText $strong={index === 1 || index === 2}>{point}</TrustText>
                     </TrustCard>
                   );
                 })}
@@ -490,12 +507,7 @@ const IndexPage: React.FC = () => {
 
       <Section>
         <Container>
-          <InfoStrip>
-            Если персональные данные собираются, но документы, согласия и уведомления оформлены неправильно, это
-            приводит к риску претензий, спешной переделке процессов и возможным штрафам. Мы помогаем заранее
-            привести это в порядок.
-          </InfoStrip>
-        </Container>
+                  </Container>
       </Section>
 
       <Section>
@@ -537,6 +549,7 @@ const IndexPage: React.FC = () => {
                   </StepHead>
                   <StepTitle>{item.title}</StepTitle>
                   <StepDescription>{item.text}</StepDescription>
+                  {'note' in item && item.note ? <StepNote>{item.note}</StepNote> : null}
                 </StepCard>
               );
             })}
@@ -548,10 +561,7 @@ const IndexPage: React.FC = () => {
         <Container>
           <SectionHeader>
             <SectionTitle>Тарифы</SectionTitle>
-            <SectionText>
-              Ниже — ориентиры для проверки спроса и готовности платить. Финальный состав документов определяется
-              после анкеты.
-            </SectionText>
+            
           </SectionHeader>
           <PricingGrid>
             {pricing.map((item, index) => {
@@ -565,16 +575,16 @@ const IndexPage: React.FC = () => {
                     </PricingIcon>
                     <PricingTier>{item.tier}</PricingTier>
                   </PricingTop>
-                  <PricingPrice>{item.price}</PricingPrice>
+                  <PricingPrice><PricingFrom>от</PricingFrom><PricingValue>{item.price.replace('от ', '')}</PricingValue></PricingPrice>
                   <PricingDescription>{item.description}</PricingDescription>
                   <PricingList>
                     {item.items.map((priceItem) => (
                       <li key={priceItem}>{priceItem}</li>
                     ))}
                   </PricingList>
-                  <PrimaryButton type="button" onClick={() => handleTariffClick(item.tier)}>
+                  <TariffButton type="button" onClick={() => handleTariffClick(item.tier)} $featured={Boolean(item.featured)}>
                     Выбрать тариф
-                  </PrimaryButton>
+                  </TariffButton>
                 </PricingCard>
               );
             })}
@@ -583,6 +593,10 @@ const IndexPage: React.FC = () => {
             Финальная стоимость зависит от состава документов и подтверждается после анкеты. Оплата — только после
             согласования работ.
           </PricingNote>
+          <AfterPricingCta>
+            <PrimaryButton type="button" onClick={() => goToForm('final_cta_click', 'Оставить заявку после тарифов')}>Оставить заявку</PrimaryButton>
+            <AfterPricingText>Оплата только после согласования состава работ</AfterPricingText>
+          </AfterPricingCta>
         </Container>
       </Section>
 
@@ -620,20 +634,48 @@ const IndexPage: React.FC = () => {
                     <label htmlFor="inn">ИНН — необязательно</label>
                     <Input id="inn" value={stepOne.inn} onChange={handleStepOneChange('inn')} />
                   </Field>
-                  <Field>
-                    <label htmlFor="selectedTariff">Выбранный тариф</label>
-                    <Select id="selectedTariff" value={stepOne.selectedTariff} onChange={handleStepOneChange('selectedTariff')}>
-                      <option value="Не знаю">Не знаю</option>
-                      <option value="Базовый">Базовый</option>
-                      <option value="Стандарт">Стандарт</option>
-                      <option value="Расширенный">Расширенный</option>
-                    </Select>
-                  </Field>
+                  <input type="hidden" name="selectedTariff" value={stepOne.selectedTariff} />
                 </FormGrid>
+                <FieldFull>
+                  <RadioQuestionTitle>Готовы ли вы оплатить подготовку, если стоимость окажется подходящей?</RadioQuestionTitle>
+                  <RadioGroup>
+                    <RadioOption>
+                      <input
+                        type="radio"
+                        name="paymentIntent"
+                        value="yes"
+                        checked={stepTwo.paymentIntent === 'yes'}
+                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'yes' }))}
+                      />
+                      <span>Да, готов оплатить после согласования</span>
+                    </RadioOption>
+                    <RadioOption>
+                      <input
+                        type="radio"
+                        name="paymentIntent"
+                        value="need_price"
+                        checked={stepTwo.paymentIntent === 'need_price'}
+                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'need_price' }))}
+                      />
+                      <span>Хочу сначала узнать точную стоимость</span>
+                    </RadioOption>
+                    <RadioOption>
+                      <input
+                        type="radio"
+                        name="paymentIntent"
+                        value="researching"
+                        checked={stepTwo.paymentIntent === 'researching'}
+                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'researching' }))}
+                      />
+                      <span>Пока изучаю варианты</span>
+                    </RadioOption>
+                  </RadioGroup>
+                </FieldFull>
                 {error && <ErrorText>{error}</ErrorText>}
                 <FormActions>
                   <PrimaryButton type="submit">Продолжить</PrimaryButton>
                 </FormActions>
+                <FormMicrotext>Специалист свяжется с вами в течение 1–2 рабочих дней и предложит состав работ с фиксированной стоимостью.</FormMicrotext>
               </FormCard>
             )}
 
@@ -681,15 +723,42 @@ const IndexPage: React.FC = () => {
                       <option value="not_sure">Не знаю</option>
                     </Select>
                   </Field>
-                  <Field>
-                    <label htmlFor="paymentIntent">Готовность оплатить после согласования</label>
-                    <Select id="paymentIntent" value={stepTwo.paymentIntent} onChange={handleStepTwoChange('paymentIntent')}>
-                      <option value="yes">Да</option>
-                      <option value="need_price">Хочу сначала узнать стоимость</option>
-                      <option value="researching">Пока изучаю</option>
-                    </Select>
-                  </Field>
                 </FormGrid>
+                <FieldFull>
+                  <RadioQuestionTitle>Готовы ли вы оплатить подготовку, если стоимость окажется подходящей?</RadioQuestionTitle>
+                  <RadioGroup>
+                    <RadioOption>
+                      <input
+                        type="radio"
+                        name="paymentIntent"
+                        value="yes"
+                        checked={stepTwo.paymentIntent === 'yes'}
+                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'yes' }))}
+                      />
+                      <span>Да, готов оплатить после согласования</span>
+                    </RadioOption>
+                    <RadioOption>
+                      <input
+                        type="radio"
+                        name="paymentIntent"
+                        value="need_price"
+                        checked={stepTwo.paymentIntent === 'need_price'}
+                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'need_price' }))}
+                      />
+                      <span>Хочу сначала узнать точную стоимость</span>
+                    </RadioOption>
+                    <RadioOption>
+                      <input
+                        type="radio"
+                        name="paymentIntent"
+                        value="researching"
+                        checked={stepTwo.paymentIntent === 'researching'}
+                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'researching' }))}
+                      />
+                      <span>Пока изучаю варианты</span>
+                    </RadioOption>
+                  </RadioGroup>
+                </FieldFull>
                 {error && <ErrorText>{error}</ErrorText>}
                 <FormActions>
                   <SecondaryButton type="button" onClick={() => setStep(1)}>
@@ -704,10 +773,9 @@ const IndexPage: React.FC = () => {
 
             {step === 3 && (
               <SuccessCard>
-                <SuccessTitle>Спасибо</SuccessTitle>
+                <SuccessTitle>Заявка принята</SuccessTitle>
                 <SectionText>
-                  Мы изучим ответы, определим предварительный состав документов и свяжемся с вами для согласования
-                  стоимости. Оплата потребуется только после подтверждения состава работ.
+                  Специалист изучит ответы анкеты и свяжется с вами в течение 1–2 рабочих дней, чтобы согласовать состав документов и стоимость. Оплата потребуется только после подтверждения.
                 </SectionText>
               </SuccessCard>
             )}
@@ -903,9 +971,10 @@ const TrustIcon = styled.div`
   color: ${theme.colors.accent};
 `;
 
-const TrustText = styled.p`
+const TrustText = styled.p<{ $strong?: boolean }>`
   margin: 0;
-  font-size: 14px;
+  font-size: ${({ $strong }): string => ($strong ? '15px' : '14px')};
+  font-weight: ${({ $strong }): number => ($strong ? 700 : 500)};
   line-height: 1.55;
 `;
 
@@ -1101,7 +1170,7 @@ const PricingCard = styled.div<{ $featured: boolean }>`
     $featured
       ? 'linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(238,243,255,0.88) 100%)'
       : 'linear-gradient(180deg, #ffffff 0%, #fbfcff 100%)'};
-  border: 1px solid ${({ $featured }): string => ($featured ? theme.colors.accentSoft : theme.colors.border)};
+  border: ${({ $featured }): string => ($featured ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`)};
   box-shadow: ${({ $featured }): string => ($featured ? theme.shadow.lg : theme.shadow.sm)};
 `;
 
@@ -1142,6 +1211,17 @@ const PricingTier = styled.div`
 `;
 
 const PricingPrice = styled.div`
+  display: grid;
+  gap: 6px;
+`;
+
+const PricingFrom = styled.span`
+  font-size: 13px;
+  color: ${theme.colors.mutedSoft};
+  line-height: 1;
+`;
+
+const PricingValue = styled.span`
   font-size: 38px;
   line-height: 1;
   font-weight: 800;
@@ -1326,6 +1406,64 @@ const FooterMiniText = styled.p`
   line-height: 1.65;
 `;
 
+const AfterPricingCta = styled.div`
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-top: 28px;
+`;
+
+const AfterPricingText = styled.p`
+  margin: 0;
+  color: ${theme.colors.muted};
+  font-size: 14px;
+  line-height: 1.5;
+`;
+
+const FormMicrotext = styled.p`
+  margin: 14px 0 0;
+  color: ${theme.colors.muted};
+  font-size: 14px;
+  line-height: 1.55;
+`;
+
+const FieldFull = styled.div`
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+`;
+
+const RadioQuestionTitle = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: ${theme.colors.text};
+`;
+
+const RadioGroup = styled.div`
+  display: grid;
+  gap: 12px;
+`;
+
+const RadioOption = styled.label`
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.55;
+  cursor: pointer;
+
+  input {
+    margin-top: 3px;
+  }
+`;
+
+const StepNote = styled.p`
+  margin: 12px 0 0;
+  color: ${theme.colors.muted};
+  font-size: 14px;
+  line-height: 1.6;
+`;
+
 const FooterMiniButton = styled.button`
   min-height: 50px;
   padding: 0 18px;
@@ -1379,4 +1517,12 @@ const SecondaryButton = styled.button`
   border: 1px solid ${theme.colors.borderStrong};
   background: rgba(255, 255, 255, 0.92);
   color: ${theme.colors.text};
+`;
+
+const TariffButton = styled.button<{ $featured: boolean }>`
+  ${buttonBase}
+  border: ${({ $featured }): string => ($featured ? 'none' : `1px solid ${theme.colors.borderStrong}`)};
+  background: ${({ $featured }): string => ($featured ? `linear-gradient(180deg, ${theme.colors.accent} 0%, ${theme.colors.accentStrong} 100%)` : 'rgba(255,255,255,0.96)')};
+  color: ${({ $featured }): string => ($featured ? '#ffffff' : theme.colors.text)};
+  box-shadow: ${({ $featured }): string => ($featured ? '0 16px 34px rgba(49, 94, 251, 0.22)' : 'none')};
 `;
