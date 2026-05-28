@@ -3,15 +3,11 @@ import styled from 'styled-components';
 import { GlobalStyles } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 
-type PricingTier = 'Базовый' | 'Стандарт' | 'Расширенный';
+type PricingTier = 'Базовый' | 'Стандарт' | 'Расширенный' | 'Не знаю';
 type FormStep = 1 | 2 | 3;
-type PaymentIntent = 'ready_after_consultation' | 'want_exact_price' | 'researching';
 type NeedType = 'site_docs' | 'rkn_notice' | 'full_package' | 'not_sure';
-type BusinessType = 'ИП' | 'ООО' | 'Другое';
+type PaymentIntent = 'yes' | 'need_price' | 'researching';
 type YesNoUnsure = 'Да' | 'Нет' | 'Не уверен';
-type SiteStatus = 'Да' | 'Нет' | 'В разработке';
-type YesNo = 'Да' | 'Нет';
-type UsageStatus = 'Да' | 'Нет' | 'Частично' | 'Не уверен';
 type NoticeStatus = 'Да' | 'Нет' | 'Не знаю';
 
 type StepOneData = {
@@ -20,54 +16,87 @@ type StepOneData = {
   email: string;
   website: string;
   inn: string;
+  selectedTariff: PricingTier;
 };
 
 type StepTwoData = {
-  businessType: BusinessType;
-  hasSite: SiteStatus;
   hasForms: YesNoUnsure;
-  collectsClientData: YesNoUnsure;
-  hasEmployees: YesNo;
-  usesCookiesOrMetrics: UsageStatus;
+  usesTools: YesNoUnsure;
+  hasEmployees: YesNoUnsure;
   filedNoticeBefore: NoticeStatus;
   needType: NeedType;
   paymentIntent: PaymentIntent;
 };
 
-type FullFormData = StepOneData & StepTwoData & {
-  selectedTariff: PricingTier | '';
+type FormMeta = {
+  utm_source: string;
+  utm_medium: string;
+  utm_campaign: string;
+  utm_content: string;
+  utm_term: string;
+  referrer: string;
+  page_url: string;
 };
 
-type AnalyticsEventName =
-  | 'view_page'
-  | 'click_cta_hero'
-  | 'click_pricing'
-  | 'start_form'
-  | 'submit_step_1'
-  | 'submit_step_2'
-  | 'select_tariff'
-  | 'click_get_invoice'
-  | 'submit_high_intent_lead';
+type FullFormPayload = StepOneData & StepTwoData & FormMeta;
 
-type AnalyticsPayload = Record<string, string | number | boolean | undefined>;
+type AnalyticsEventName =
+  | 'page_view'
+  | 'hero_cta_click'
+  | 'pricing_view'
+  | 'tariff_click'
+  | 'form_start'
+  | 'form_step_1_submit'
+  | 'form_step_2_submit'
+  | 'form_success'
+  | 'faq_open'
+  | 'final_cta_click';
+
+type AnalyticsPayload = Record<string, string | boolean | number | undefined>;
 
 type DataLayerWindow = Window & {
   dataLayer?: Array<Record<string, unknown>>;
+  ym?: (...args: unknown[]) => void;
 };
 
 const trackEvent = (event: AnalyticsEventName, payload: AnalyticsPayload = {}): void => {
-  const eventPayload = { event, ...payload };
+  const data = { event, ...payload };
+
   if (typeof window !== 'undefined') {
     const currentWindow = window as DataLayerWindow;
+
     if (Array.isArray(currentWindow.dataLayer)) {
-      currentWindow.dataLayer.push(eventPayload);
+      currentWindow.dataLayer.push(data);
+    }
+
+    if (typeof currentWindow.ym === 'function' && process.env.GATSBY_YANDEX_METRIKA_ID) {
+      currentWindow.ym(process.env.GATSBY_YANDEX_METRIKA_ID, 'reachGoal', event, payload);
     }
   }
+
   // eslint-disable-next-line no-console
-  console.info('[analytics]', eventPayload);
+  console.info('[analytics]', data);
 };
 
-const submitLead = async (payload: FullFormData): Promise<void> => {
+const getUrlParam = (key: string): string => {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  return new URLSearchParams(window.location.search).get(key) ?? '';
+};
+
+const buildMeta = (): FormMeta => ({
+  utm_source: getUrlParam('utm_source'),
+  utm_medium: getUrlParam('utm_medium'),
+  utm_campaign: getUrlParam('utm_campaign'),
+  utm_content: getUrlParam('utm_content'),
+  utm_term: getUrlParam('utm_term'),
+  referrer: typeof document !== 'undefined' ? document.referrer : '',
+  page_url: typeof window !== 'undefined' ? window.location.href : '',
+});
+
+const submitLead = async (payload: FullFormPayload): Promise<void> => {
   const response = await fetch('/api/submit', {
     method: 'POST',
     headers: {
@@ -81,147 +110,55 @@ const submitLead = async (payload: FullFormData): Promise<void> => {
   }
 };
 
-const initialStepOne: StepOneData = {
-  name: '',
-  phone: '',
-  email: '',
-  website: '',
-  inn: '',
-};
-
-const initialStepTwo: StepTwoData = {
-  businessType: 'ИП',
-  hasSite: 'Да',
-  hasForms: 'Да',
-  collectsClientData: 'Да',
-  hasEmployees: 'Нет',
-  usesCookiesOrMetrics: 'Да',
-  filedNoticeBefore: 'Не знаю',
-  needType: 'full_package',
-  paymentIntent: 'want_exact_price',
-};
-
-const heroBenefits = [
-  'Под ваш бизнес, а не шаблон из интернета',
-  'Понятный состав работ и оплата после подтверждения',
-  'Обычно 7–14 дней на подготовку комплекта',
+const heroPoints = [
+  '7–14 дней на подготовку',
+  'Оплата после согласования состава работ',
+  'Документы готовят специалисты по 152-ФЗ',
+  'Без универсальных шаблонов “для всех”',
 ];
 
-const problemItems = [
-  'Форма заявки, обратный звонок, регистрация или онлайн-запись на сайте',
-  'Cookies, Яндекс Метрика, CRM, рассылки и другие инструменты маркетинга',
-  'Данные сотрудников, соискателей, клиентов и контактных лиц контрагентов',
-  'Заявки из соцсетей, мессенджеров, таблиц и офлайн-анкет',
-];
-
-const riskColumns = [
-  {
-    title: 'Что может быть не так',
-    items: [
-      'На сайте есть формы, но нет политики обработки персональных данных',
-      'Согласие на обработку данных оформлено некорректно или отсутствует',
-      'Используются cookies и метрики, но пользователь об этом не уведомляется',
-      'Неясно, нужно ли подавать уведомление в Роскомнадзор',
-    ],
-  },
-  {
-    title: 'Чем это грозит',
-    items: [
-      'Риск претензий к сайту и способу сбора данных',
-      'Потеря времени на срочное исправление документов и формулировок',
-      'Замечания по согласиям, политике и процессам обработки данных',
-      'Штрафы и предписания — в зависимости от конкретной ситуации',
-    ],
-  },
-  {
-    title: 'Почему лучше разобраться заранее',
-    items: [
-      'Спокойно привести сайт и процессы в порядок до проверки или запроса',
-      'Закрыть сразу несколько типовых задач одним комплектом документов',
-      'Получить понятную инструкцию: что разместить, где собирать согласие и нужен ли РКН',
-      'Снизить риск ошибок из-за шаблонов и обрывочных советов из интернета',
-    ],
-  },
+const whoItsFor = [
+  'Есть сайт с формой заявки',
+  'Используете cookies, Метрику, CRM или рассылки',
+  'Есть сотрудники или соискатели',
+  'Собираете заявки из соцсетей или мессенджеров',
+  'Передаёте данные подрядчикам',
+  'Не уверены, подавали ли уведомление в РКН',
 ];
 
 const deliverables = [
   'Политика обработки персональных данных',
-  'Согласия на обработку персональных данных',
-  'Формулировки для форм на сайте',
-  'Согласия или уведомления по cookies — если нужно',
-  'Документы по данным сотрудников и соискателей — если применимо',
-  'Инструкции, где и как разместить документы',
-  'Инструкция, когда и как получать согласие',
-  'Рекомендации по хранению и обработке данных',
-  'Подготовленное уведомление в Роскомнадзор',
-  'Инструкция по подаче уведомления в зависимости от вашей ситуации',
+  'Согласия и формулировки для сайта',
+  'Рекомендации по cookies и метрикам',
+  'Документы по сотрудникам — если применимо',
+  'Подготовленное уведомление в РКН — если требуется',
+  'Инструкция: что, где и когда разместить',
 ];
 
-const steps = [
-  'Оставляете заявку и указываете базовую информацию о компании',
-  'Заполняете анкету о сайте, клиентах, сотрудниках, CRM, cookies и каналах сбора данных',
-  'Специалист определяет, какие документы и инструкции нужны именно вам',
-  'Мы готовим комплект документов и блок по уведомлению РКН, если он требуется',
-  'Вы получаете пакет и понятные дальнейшие шаги по внедрению',
-];
-
-const segments = [
-  'Есть сайт с формой заявки',
-  'Есть интернет-магазин или онлайн-запись',
-  'Запускаете рекламу и собираете лиды',
-  'Используете cookies, метрики или CRM',
-  'Есть сотрудники или соискатели',
-  'Собираете заявки через соцсети и мессенджеры',
-  'Ведёте клиентскую базу',
-  'Не уверены, подавали ли уведомление в РКН',
-];
-
-const templateRisks = [
-  'Ваши реальные цели обработки персональных данных',
-  'Категории данных, которые вы собираете',
-  'Cookies, аналитику и маркетинговые сценарии',
-  'Сотрудников, соискателей и подрядчиков',
-  'Передачу данных третьим лицам',
-  'Необходимость уведомления РКН',
-  'То, как именно устроены формы и каналы сбора данных',
+const processSteps = [
+  'Вы заполняете короткую анкету о бизнесе',
+  'Мы определяем состав документов и согласуем стоимость',
+  'Готовим комплект и инструкцию за 7–14 дней',
 ];
 
 const pricing = [
   {
     tier: 'Базовый' as PricingTier,
     price: 'от 29 900 ₽',
-    description: 'Для бизнеса с сайтом, формами заявок и базовыми сценариями сбора данных.',
-    items: [
-      'Политика обработки ПДн',
-      'Согласие на обработку ПДн',
-      'Формулировки для форм сайта',
-      'Рекомендации по размещению документов',
-      'Подготовка черновика уведомления РКН — если применимо',
-    ],
+    description: 'Для сайта с формами заявок и базовыми сценариями сбора данных.',
+    items: ['Политика и согласие', 'Формулировки для сайта', 'Базовые рекомендации по размещению'],
   },
   {
     tier: 'Стандарт' as PricingTier,
     price: 'от 49 900 ₽',
-    description: 'Для бизнеса с сайтом, клиентской базой, сотрудниками, CRM и несколькими сценариями обработки данных.',
-    items: [
-      'Всё из Базового',
-      'Документы по данным сотрудников и соискателей',
-      'Расширенная проработка процессов',
-      'Рекомендации по хранению и обработке данных',
-      'Подготовка уведомления РКН и инструкция по подаче',
-    ],
+    description: 'Для бизнеса с сайтом, клиентской базой, сотрудниками, CRM и несколькими каналами сбора данных.',
+    items: ['Всё из базового', 'Блок по сотрудникам', 'Подготовка уведомления РКН'],
   },
   {
     tier: 'Расширенный' as PricingTier,
     price: 'от 79 900 ₽',
-    description: 'Для сложных процессов: несколько сайтов, много форм, подрядчики, внешние сервисы и индивидуальная проработка.',
-    items: [
-      'Индивидуальная оценка процессов обработки данных',
-      'Несколько сайтов или направлений бизнеса',
-      'Сложные сценарии передачи данных подрядчикам',
-      'Проработка нестандартных источников заявок и интеграций',
-      'Персональный расчёт после уточнения состава работ',
-    ],
+    description: 'Для сложных процессов: несколько сайтов, подрядчики, внешние сервисы, нестандартные сценарии.',
+    items: ['Индивидуальный состав комплекта', 'Несколько сценариев сбора данных', 'Подробная проработка процессов'],
   },
 ];
 
@@ -229,94 +166,134 @@ const faqItems = [
   {
     question: 'Нужно ли уведомлять РКН всем?',
     answer:
-      'Не всегда. Это зависит от того, как именно вы обрабатываете персональные данные, в каких целях и какие исключения могут применяться. В анкете мы помогаем понять, нужен ли вам этот шаг.',
-  },
-  {
-    question: 'Что будет, если на сайте есть форма заявки, но нет политики?',
-    answer:
-      'Это повышает риск вопросов к сайту и способу сбора данных. Если через форму собираются персональные данные, важно проверить, какие документы должны быть размещены и как оформлено согласие.',
-  },
-  {
-    question: 'Можно ли использовать шаблон из интернета?',
-    answer:
-      'Шаблон может быть отправной точкой, но обычно он не учитывает ваш сайт, cookies, CRM, сотрудников, подрядчиков и необходимость уведомления РКН. Поэтому он редко закрывает задачу полностью.',
+      'Не всегда. Это зависит от того, как именно вы собираете и обрабатываете данные. Мы поможем понять это после анкеты.',
   },
   {
     question: 'Вы проверяете сайт автоматически?',
     answer:
-      'Нет. Мы не делаем автоматический аудит роботом. Сначала вы заполняете анкету, а затем специалисты вручную определяют состав документов и готовят комплект.',
+      'Нет. Мы не делаем автоматический аудит. Комплект готовится вручную на основе анкеты о вашем бизнесе и процессах.',
   },
   {
-    question: 'Что входит в комплект документов?',
+    question: 'Можно ли использовать шаблон из интернета?',
     answer:
-      'Обычно это политика обработки персональных данных, согласия, формулировки для сайта, инструкции по размещению и рекомендации по получению согласий. При необходимости — подготовка уведомления в РКН и инструкция по его подаче.',
-  },
-  {
-    question: 'Сколько занимает подготовка?',
-    answer:
-      'Обычно от 7 до 14 дней после получения всех необходимых данных. Срок зависит от сложности процессов и состава комплекта.',
-  },
-  {
-    question: 'Как подаётся уведомление в РКН?',
-    answer:
-      'Способ подачи зависит от вашей ситуации. Обычно рассматриваются варианты подачи на бумаге, через УКЭП или через ЕСИА. Мы готовим текст и даём инструкцию по подходящему способу подачи.',
-  },
-  {
-    question: 'Можно ли получить только уведомление РКН?',
-    answer:
-      'Иногда да. Но часто вопрос уведомления связан с тем, как оформлены сами процессы и документы. Поэтому сначала полезно понять общую картину.',
-  },
-  {
-    question: 'Что делать, если документы уже есть?',
-    answer:
-      'Можно оставить заявку и указать это в анкете. Мы поможем понять, нужен ли новый комплект, доработка текущих документов или только отдельный блок.',
+      'Можно как ориентир, но шаблон редко учитывает ваши реальные процессы, cookies, сотрудников, подрядчиков и уведомление РКН.',
   },
   {
     question: 'Даёте ли вы гарантию?',
     answer:
-      'Мы не обещаем “штрафов точно не будет” или “РКН точно примет без вопросов”. Наша задача — подготовить документы и инструкции с учётом ваших процессов и требований 152-ФЗ, чтобы снизить риски и помочь навести порядок.',
+      'Нет абсолютных гарантий мы не обещаем. Наша задача — подготовить документы и инструкции так, чтобы снизить риск ошибок и претензий.',
   },
 ];
+
+const initialStepOne: StepOneData = {
+  name: '',
+  phone: '',
+  email: '',
+  website: '',
+  inn: '',
+  selectedTariff: 'Не знаю',
+};
+
+const initialStepTwo: StepTwoData = {
+  hasForms: 'Да',
+  usesTools: 'Да',
+  hasEmployees: 'Не уверен',
+  filedNoticeBefore: 'Не знаю',
+  needType: 'full_package',
+  paymentIntent: 'need_price',
+};
 
 const IndexPage: React.FC = () => {
   const [step, setStep] = useState<FormStep>(1);
   const [stepOne, setStepOne] = useState<StepOneData>(initialStepOne);
   const [stepTwo, setStepTwo] = useState<StepTwoData>(initialStepTwo);
-  const [selectedTariff, setSelectedTariff] = useState<PricingTier | ''>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [meta, setMeta] = useState<FormMeta>({
+    utm_source: '',
+    utm_medium: '',
+    utm_campaign: '',
+    utm_content: '',
+    utm_term: '',
+    referrer: '',
+    page_url: '',
+  });
+  const [startedForm, setStartedForm] = useState(false);
   const [error, setError] = useState('');
-  const [hasStartedForm, setHasStartedForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pricingTracked, setPricingTracked] = useState(false);
 
   useEffect(() => {
-    trackEvent('view_page', {
-      variant_positioning: 'hybrid_b_focus',
-      pricing_visible: true,
+    setMeta(buildMeta());
+    trackEvent('page_view', {
+      page_type: 'landing',
+      has_utm: typeof window !== 'undefined' ? window.location.search.includes('utm_') : false,
     });
   }, []);
 
-  const fullPayload = useMemo<FullFormData>(
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const pricingSection = document.getElementById('pricing');
+    if (!pricingSection || pricingTracked) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            trackEvent('pricing_view', { section: 'pricing' });
+            setPricingTracked(true);
+          }
+        });
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(pricingSection);
+
+    return () => observer.disconnect();
+  }, [pricingTracked]);
+
+  const payload = useMemo<FullFormPayload>(
     () => ({
       ...stepOne,
       ...stepTwo,
-      selectedTariff,
+      ...meta,
     }),
-    [selectedTariff, stepOne, stepTwo]
+    [meta, stepOne, stepTwo]
   );
 
-  const markFormStart = (entryPoint: string): void => {
-    if (!hasStartedForm) {
-      setHasStartedForm(true);
-      trackEvent('start_form', {
-        entry_point: entryPoint,
-        selected_tariff: selectedTariff,
-      });
+  const goToForm = (eventName: 'hero_cta_click' | 'final_cta_click', label: string): void => {
+    trackEvent(eventName, { cta_text: label });
+
+    if (!startedForm) {
+      setStartedForm(true);
+      trackEvent('form_start', { source: label });
     }
+
+    document.getElementById('lead-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleStepOneChange = (field: keyof StepOneData) => (event: ChangeEvent<HTMLInputElement>): void => {
-    if (!hasStartedForm) {
-      markFormStart('form_step_1');
+  const handleTariffClick = (tier: PricingTier): void => {
+    setStepOne((current) => ({ ...current, selectedTariff: tier }));
+    trackEvent('tariff_click', { tariff: tier });
+
+    if (!startedForm) {
+      setStartedForm(true);
+      trackEvent('form_start', { source: `pricing_${tier}` });
     }
+
+    document.getElementById('lead-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleStepOneChange = (field: keyof StepOneData) => (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+    if (!startedForm) {
+      setStartedForm(true);
+      trackEvent('form_start', { source: 'field_interaction' });
+    }
+
     setStepOne((current) => ({
       ...current,
       [field]: event.target.value,
@@ -332,53 +309,18 @@ const IndexPage: React.FC = () => {
       }));
     };
 
-  const handleHeroCta = (ctaText: string, ctaType: 'primary' | 'secondary'): void => {
-    trackEvent('click_cta_hero', {
-      cta_text: ctaText,
-      cta_type: ctaType,
-      variant_positioning: 'hybrid_b_focus',
-    });
-    markFormStart('hero');
-    document.getElementById('lead-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const handleSelectTariff = (tier: PricingTier): void => {
-    setSelectedTariff(tier);
-    trackEvent('click_pricing', {
-      tariff_name: tier,
-      tariff_price_anchor: pricing.find((item) => item.tier === tier)?.price,
-    });
-    trackEvent('select_tariff', {
-      tariff_name: tier,
-      tariff_price_anchor: pricing.find((item) => item.tier === tier)?.price,
-      from_block: 'pricing',
-    });
-    trackEvent('click_get_invoice', {
-      tariff_name: tier,
-      payment_intent_known: step === 2 || step === 3,
-    });
-    markFormStart('pricing');
-    document.getElementById('lead-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const validateStepOne = (): boolean => {
-    if (!stepOne.name || !stepOne.phone || !stepOne.email || !stepOne.website) {
-      setError('Заполните имя, телефон, email и сайт компании.');
-      return false;
-    }
-    setError('');
-    return true;
-  };
-
   const submitStepOne = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
-    if (!validateStepOne()) {
+
+    if (!stepOne.name || !stepOne.phone || !stepOne.email || !stepOne.website) {
+      setError('Заполните имя, телефон, email и сайт компании.');
       return;
     }
-    trackEvent('submit_step_1', {
-      has_website: stepOne.website.trim() ? 'yes' : 'no',
-      has_inn: stepOne.inn.trim() ? 'yes' : 'no',
-      entry_point: selectedTariff ? 'pricing' : 'hero_or_page',
+
+    setError('');
+    trackEvent('form_step_1_submit', {
+      selected_tariff: stepOne.selectedTariff,
+      has_inn: Boolean(stepOne.inn),
     });
     setStep(2);
   };
@@ -389,30 +331,19 @@ const IndexPage: React.FC = () => {
     setError('');
 
     try {
-      trackEvent('submit_step_2', {
-        business_type: stepTwo.businessType,
-        has_site: stepTwo.hasSite,
+      trackEvent('form_step_2_submit', {
         has_forms: stepTwo.hasForms,
-        collects_client_data: stepTwo.collectsClientData,
+        uses_tools: stepTwo.usesTools,
         has_employees: stepTwo.hasEmployees,
-        uses_cookies_or_metrics: stepTwo.usesCookiesOrMetrics,
-        rkn_notice_status: stepTwo.filedNoticeBefore,
         need_type: stepTwo.needType,
         payment_intent: stepTwo.paymentIntent,
       });
 
-      if (selectedTariff || stepTwo.paymentIntent === 'ready_after_consultation') {
-        trackEvent('submit_high_intent_lead', {
-          tariff_name: selectedTariff,
-          payment_intent: stepTwo.paymentIntent,
-          need_type: stepTwo.needType,
-          has_site: stepTwo.hasSite,
-          uses_cookies_or_metrics: stepTwo.usesCookiesOrMetrics,
-          has_employees: stepTwo.hasEmployees,
-        });
-      }
-
-      await submitLead(fullPayload);
+      await submitLead(payload);
+      trackEvent('form_success', {
+        selected_tariff: stepOne.selectedTariff,
+        payment_intent: stepTwo.paymentIntent,
+      });
       setStep(3);
     } catch (submissionError) {
       const message = submissionError instanceof Error ? submissionError.message : 'Не удалось отправить заявку.';
@@ -423,487 +354,649 @@ const IndexPage: React.FC = () => {
   };
 
   return (
-    <PageShell>
+    <Page>
       <GlobalStyles />
-      <HeroSection>
+
+      <Hero>
         <Container>
-          <TopBadge>152-ФЗ · документы под ваш бизнес · без шаблонов</TopBadge>
           <HeroGrid>
-            <div>
-              <HeroTitle>Документы по персональным данным для бизнеса — под ваш сайт и процессы</HeroTitle>
+            <HeroMain>
+              <Eyebrow>152-ФЗ · fake door landing</Eyebrow>
+              <HeroTitle>Документы по персональным данным под ваш бизнес</HeroTitle>
               <HeroText>
-                Подготовим комплект документов по 152-ФЗ на основе анкеты о вашем бизнесе: политику,
-                согласия, формулировки для сайта, инструкции по размещению и уведомление в Роскомнадзор,
-                если оно требуется.
+                Подготовим политику, согласия, формулировки для сайта, инструкцию по размещению и уведомление в
+                РКН — на основе анкеты о вашем бизнесе.
               </HeroText>
               <HeroActions>
-                <PrimaryButton type="button" onClick={() => handleHeroCta('Получить расчёт и список документов', 'primary')}>
-                  Получить расчёт и список документов
+                <PrimaryButton type="button" onClick={() => goToForm('hero_cta_click', 'Получить расчёт')}>
+                  Получить расчёт
                 </PrimaryButton>
-                <SecondaryButton type="button" onClick={() => handleHeroCta('Проверить, что нужно моему бизнесу', 'secondary')}>
-                  Проверить, что нужно моему бизнесу
+                <SecondaryButton type="button" onClick={() => goToForm('hero_cta_click', 'Проверить, что нужно')}>
+                  Проверить, что нужно
                 </SecondaryButton>
               </HeroActions>
-              <BenefitList>
-                {heroBenefits.map((benefit) => (
-                  <BenefitItem key={benefit}>{benefit}</BenefitItem>
+            </HeroMain>
+
+            <TrustCard>
+              <SummaryTitle>Коротко о формате работы</SummaryTitle>
+              <BulletList>
+                {heroPoints.map((point) => (
+                  <li key={point}>{point}</li>
                 ))}
-              </BenefitList>
-              <HeroNote>
-                Документы готовят специалисты по 152-ФЗ и юридическому сопровождению бизнеса. Оплата —
-                только после подтверждения состава работ.
-              </HeroNote>
-            </div>
-            <HighlightCard>
-              <CardTitle>Что вы получаете</CardTitle>
-              <CheckList>
-                <li>Политику, согласия и формулировки для сайта</li>
-                <li>Понятную инструкцию, что и где разместить</li>
-                <li>Подготовленное уведомление РКН — если нужно</li>
-                <li>Рекомендации по хранению и обработке данных</li>
-              </CheckList>
-              <InlineMetric>
-                <strong>7–14 дней</strong>
-                <span>обычно занимает подготовка после получения всех данных</span>
-              </InlineMetric>
-            </HighlightCard>
+              </BulletList>
+            </TrustCard>
           </HeroGrid>
         </Container>
-      </HeroSection>
+      </Hero>
 
-      <ContentSection>
+      <Section>
+        <Container>
+          <CompactGrid>
+            <ContentCard>
+              <SectionTitle>Кому это актуально</SectionTitle>
+              <BulletList>
+                {whoItsFor.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </BulletList>
+            </ContentCard>
+
+            <NoticeCard>
+              <SectionTitle>Почему это важно</SectionTitle>
+              <SectionText>
+                Если данные собираются, но документы, согласия или уведомление оформлены неверно, это может
+                привести к вопросам со стороны клиентов, партнёров или РКН. Мы помогаем заранее привести
+                документы и процесс сбора согласий в порядок.
+              </SectionText>
+            </NoticeCard>
+          </CompactGrid>
+        </Container>
+      </Section>
+
+      <Section>
+        <Container>
+          <WideCard>
+            <SectionTitle>Что клиент получает</SectionTitle>
+            <ResultGrid>
+              {deliverables.map((item) => (
+                <ResultItem key={item}>{item}</ResultItem>
+              ))}
+            </ResultGrid>
+          </WideCard>
+        </Container>
+      </Section>
+
+      <Section>
+        <Container>
+          <WideCard>
+            <SectionTitle>Как это работает</SectionTitle>
+            <ProcessGrid>
+              {processSteps.map((item, index) => (
+                <ProcessItem key={item}>
+                  <StepIndex>0{index + 1}</StepIndex>
+                  <ProcessText>{item}</ProcessText>
+                </ProcessItem>
+              ))}
+            </ProcessGrid>
+          </WideCard>
+        </Container>
+      </Section>
+
+      <Section id="pricing">
         <Container>
           <SectionHeader>
-            <SectionEyebrow>Почему это касается почти каждого бизнеса</SectionEyebrow>
-            <SectionTitle>Персональные данные у вас уже есть — даже если вы так это не называете</SectionTitle>
+            <SectionTitle>Стоимость</SectionTitle>
             <SectionText>
-              Если вы собираете имя, телефон, email, данные сотрудников или используете cookies и аналитику,
-              у вас уже есть процессы обработки персональных данных.
+              Точный состав документов определяется после анкеты. Ниже — ориентиры для проверки спроса и
+              готовности платить.
             </SectionText>
           </SectionHeader>
-          <Grid columns="repeat(auto-fit, minmax(220px, 1fr))">
-            {problemItems.map((item) => (
-              <Card key={item}>
-                <CardTitle>{item}</CardTitle>
-              </Card>
-            ))}
-          </Grid>
-        </Container>
-      </ContentSection>
-
-      <AltSection>
-        <Container>
-          <SectionHeader>
-            <SectionEyebrow>Риски</SectionEyebrow>
-            <SectionTitle>Что может быть не так — и почему лучше разобраться заранее</SectionTitle>
-            <SectionText>
-              Мы не строим коммуникацию на запугивании, но и не делаем вид, что вопрос можно откладывать
-              бесконечно. Если данные собираются, важно понимать, какие документы, согласия и уведомления нужны
-              именно вам.
-            </SectionText>
-          </SectionHeader>
-          <Grid columns="repeat(auto-fit, minmax(260px, 1fr))">
-            {riskColumns.map((column) => (
-              <Card key={column.title}>
-                <CardTitle>{column.title}</CardTitle>
-                <CheckList>
-                  {column.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </CheckList>
-              </Card>
-            ))}
-          </Grid>
-          <Disclaimer>
-            Наличие документов не даёт абсолютной гарантии, но помогает снизить риск претензий и привести сайт
-            и процессы ближе к требованиям 152-ФЗ.
-          </Disclaimer>
-        </Container>
-      </AltSection>
-
-      <ContentSection>
-        <Container>
-          <SectionHeader>
-            <SectionEyebrow>Что мы делаем</SectionEyebrow>
-            <SectionTitle>Готовим комплект документов по персональным данным под ваш бизнес</SectionTitle>
-            <SectionText>
-              Мы не выдаём один шаблон всем подряд. Сначала смотрим на ваши каналы сбора данных, процессы,
-              сотрудников, подрядчиков и только после этого определяем состав комплекта.
-            </SectionText>
-          </SectionHeader>
-          <Grid columns="repeat(auto-fit, minmax(250px, 1fr))">
-            {deliverables.map((item) => (
-              <Card key={item}>
-                <CardTitle>{item}</CardTitle>
-              </Card>
-            ))}
-          </Grid>
-          <BodyNote>
-            Состав документов зависит от того, какие данные вы собираете, через какие каналы, кому передаёте и
-            как организованы процессы внутри бизнеса.
-          </BodyNote>
-        </Container>
-      </ContentSection>
-
-      <AltSection>
-        <Container>
-          <SectionHeader>
-            <SectionEyebrow>Как это работает</SectionEyebrow>
-            <SectionTitle>Понятный процесс без самостоятельного погружения в 152-ФЗ</SectionTitle>
-          </SectionHeader>
-          <StepsList>
-            {steps.map((item, index) => (
-              <StepCard key={item}>
-                <StepNumber>0{index + 1}</StepNumber>
-                <StepText>{item}</StepText>
-              </StepCard>
-            ))}
-          </StepsList>
-          <BodyNote>
-            Обычно подготовка занимает <strong>7–14 дней</strong> после получения всех необходимых данных.
-          </BodyNote>
-        </Container>
-      </AltSection>
-
-      <ContentSection>
-        <Container>
-          <SectionHeader>
-            <SectionEyebrow>Кому это особенно актуально</SectionEyebrow>
-            <SectionTitle>Если узнали себя хотя бы в нескольких пунктах — есть смысл разобраться заранее</SectionTitle>
-          </SectionHeader>
-          <Grid columns="repeat(auto-fit, minmax(220px, 1fr))">
-            {segments.map((item) => (
-              <Card key={item}>
-                <CardTitle>{item}</CardTitle>
-              </Card>
-            ))}
-          </Grid>
-        </Container>
-      </ContentSection>
-
-      <AltSection>
-        <Container>
-          <SectionHeader>
-            <SectionEyebrow>Почему не шаблон</SectionEyebrow>
-            <SectionTitle>Шаблон из интернета не учитывает, как именно ваш бизнес работает с данными</SectionTitle>
-            <SectionText>
-              Ценность услуги не в “бумажке”, а в комплекте под конкретный бизнес и понятной инструкции, что с
-              этим делать дальше.
-            </SectionText>
-          </SectionHeader>
-          <Grid columns="repeat(auto-fit, minmax(220px, 1fr))">
-            {templateRisks.map((item) => (
-              <Card key={item}>
-                <CardTitle>{item}</CardTitle>
-              </Card>
-            ))}
-          </Grid>
-        </Container>
-      </AltSection>
-
-      <ContentSection id="pricing">
-        <Container>
-          <SectionHeader>
-            <SectionEyebrow>Ориентиры по стоимости</SectionEyebrow>
-            <SectionTitle>Тарифы для первичной оценки спроса и состава работ</SectionTitle>
-            <SectionText>
-              Финальная стоимость зависит от количества сценариев сбора данных, сотрудников, подрядчиков,
-              уведомления РКН и других факторов. Поэтому на странице указаны ориентиры “от”.
-            </SectionText>
-          </SectionHeader>
-          <Grid columns="repeat(auto-fit, minmax(280px, 1fr))">
+          <PricingGrid>
             {pricing.map((item) => (
               <PricingCard key={item.tier}>
-                <PricingTier>{item.tier}</PricingTier>
+                <PricingTierLabel>{item.tier}</PricingTierLabel>
                 <PricingPrice>{item.price}</PricingPrice>
-                <PricingText>{item.description}</PricingText>
-                <CheckList>
+                <PricingDescription>{item.description}</PricingDescription>
+                <CompactList>
                   {item.items.map((priceItem) => (
                     <li key={priceItem}>{priceItem}</li>
                   ))}
-                </CheckList>
-                <PrimaryButton type="button" onClick={() => handleSelectTariff(item.tier)}>
-                  {item.tier === 'Расширенный' ? 'Запросить индивидуальный расчёт' : 'Выбрать тариф'}
+                </CompactList>
+                <PrimaryButton type="button" onClick={() => handleTariffClick(item.tier)}>
+                  Выбрать тариф
                 </PrimaryButton>
               </PricingCard>
             ))}
-          </Grid>
-          <BodyNote>
-            Оплата не списывается на сайте. Сначала мы определяем предварительный состав работ, подтверждаем,
-            что входит в комплект, и только после этого обсуждаем оплату.
-          </BodyNote>
+          </PricingGrid>
+          <MutedNote>
+            Финальная стоимость зависит от состава документов и подтверждается после анкеты. Оплата — только
+            после согласования работ.
+          </MutedNote>
         </Container>
-      </ContentSection>
+      </Section>
 
-      <AltSection id="lead-form">
+      <Section id="lead-form">
         <Container narrow>
-          <SectionHeader>
-            <SectionEyebrow>Заявка</SectionEyebrow>
-            <SectionTitle>Узнайте, какие документы нужны именно вашему бизнесу</SectionTitle>
+          <WideCard>
+            <SectionTitle>Заявка</SectionTitle>
             <SectionText>
-              Ответьте на несколько вопросов — мы определим предварительный состав комплекта и предложим
-              подходящий формат работы.
+              Основной путь простой: короткая анкета → предварительный состав работ → согласование стоимости.
             </SectionText>
-          </SectionHeader>
 
-          {step === 1 && (
-            <FormCard onSubmit={submitStepOne}>
-              <FormGrid>
-                <InputWrap>
-                  <label htmlFor="name">Имя</label>
-                  <TextInput id="name" value={stepOne.name} onChange={handleStepOneChange('name')} />
-                </InputWrap>
-                <InputWrap>
-                  <label htmlFor="phone">Телефон</label>
-                  <TextInput id="phone" value={stepOne.phone} onChange={handleStepOneChange('phone')} />
-                </InputWrap>
-                <InputWrap>
-                  <label htmlFor="email">Email</label>
-                  <TextInput id="email" type="email" value={stepOne.email} onChange={handleStepOneChange('email')} />
-                </InputWrap>
-                <InputWrap>
-                  <label htmlFor="website">Сайт компании</label>
-                  <TextInput id="website" value={stepOne.website} onChange={handleStepOneChange('website')} />
-                </InputWrap>
-                <InputWrap full>
-                  <label htmlFor="inn">ИНН — если готовы указать</label>
-                  <TextInput id="inn" value={stepOne.inn} onChange={handleStepOneChange('inn')} />
-                </InputWrap>
-              </FormGrid>
-              {error && <ErrorText>{error}</ErrorText>}
-              <PrimaryButton type="submit">Получить расчёт и список нужных документов</PrimaryButton>
-              <SmallNote>
-                Отправляя форму, вы соглашаетесь на обработку персональных данных для связи по заявке.
-              </SmallNote>
-            </FormCard>
-          )}
+            {step === 1 && (
+              <FormCard onSubmit={submitStepOne}>
+                <FormGrid>
+                  <Field>
+                    <label htmlFor="name">Имя</label>
+                    <Input id="name" value={stepOne.name} onChange={handleStepOneChange('name')} />
+                  </Field>
+                  <Field>
+                    <label htmlFor="phone">Телефон</label>
+                    <Input id="phone" value={stepOne.phone} onChange={handleStepOneChange('phone')} />
+                  </Field>
+                  <Field>
+                    <label htmlFor="email">Email</label>
+                    <Input id="email" type="email" value={stepOne.email} onChange={handleStepOneChange('email')} />
+                  </Field>
+                  <Field>
+                    <label htmlFor="website">Сайт компании</label>
+                    <Input id="website" value={stepOne.website} onChange={handleStepOneChange('website')} />
+                  </Field>
+                  <Field>
+                    <label htmlFor="inn">ИНН — необязательно</label>
+                    <Input id="inn" value={stepOne.inn} onChange={handleStepOneChange('inn')} />
+                  </Field>
+                  <Field>
+                    <label htmlFor="selectedTariff">Выбранный тариф</label>
+                    <Select id="selectedTariff" value={stepOne.selectedTariff} onChange={handleStepOneChange('selectedTariff')}>
+                      <option value="Не знаю">Не знаю</option>
+                      <option value="Базовый">Базовый</option>
+                      <option value="Стандарт">Стандарт</option>
+                      <option value="Расширенный">Расширенный</option>
+                    </Select>
+                  </Field>
+                </FormGrid>
+                {error && <ErrorText>{error}</ErrorText>}
+                <PrimaryButton type="submit">Продолжить</PrimaryButton>
+              </FormCard>
+            )}
 
-          {step === 2 && (
-            <FormCard onSubmit={submitStepTwo}>
-              <FormGrid>
-                <SelectWrap>
-                  <label htmlFor="businessType">Форма бизнеса</label>
-                  <SelectField id="businessType" value={stepTwo.businessType} onChange={handleStepTwoChange('businessType')}>
-                    <option value="ИП">ИП</option>
-                    <option value="ООО">ООО</option>
-                    <option value="Другое">Другое</option>
-                  </SelectField>
-                </SelectWrap>
-                <SelectWrap>
-                  <label htmlFor="hasSite">Есть ли сайт</label>
-                  <SelectField id="hasSite" value={stepTwo.hasSite} onChange={handleStepTwoChange('hasSite')}>
-                    <option value="Да">Да</option>
-                    <option value="Нет">Нет</option>
-                    <option value="В разработке">В разработке</option>
-                  </SelectField>
-                </SelectWrap>
-                <SelectWrap>
-                  <label htmlFor="hasForms">Есть ли формы заявок</label>
-                  <SelectField id="hasForms" value={stepTwo.hasForms} onChange={handleStepTwoChange('hasForms')}>
-                    <option value="Да">Да</option>
-                    <option value="Нет">Нет</option>
-                    <option value="Не уверен">Не уверен</option>
-                  </SelectField>
-                </SelectWrap>
-                <SelectWrap>
-                  <label htmlFor="collectsClientData">Собираете ли данные клиентов</label>
-                  <SelectField id="collectsClientData" value={stepTwo.collectsClientData} onChange={handleStepTwoChange('collectsClientData')}>
-                    <option value="Да">Да</option>
-                    <option value="Нет">Нет</option>
-                    <option value="Не уверен">Не уверен</option>
-                  </SelectField>
-                </SelectWrap>
-                <SelectWrap>
-                  <label htmlFor="hasEmployees">Есть ли сотрудники</label>
-                  <SelectField id="hasEmployees" value={stepTwo.hasEmployees} onChange={handleStepTwoChange('hasEmployees')}>
-                    <option value="Да">Да</option>
-                    <option value="Нет">Нет</option>
-                  </SelectField>
-                </SelectWrap>
-                <SelectWrap>
-                  <label htmlFor="usesCookiesOrMetrics">Используете ли cookies / метрики / CRM / рассылки</label>
-                  <SelectField
-                    id="usesCookiesOrMetrics"
-                    value={stepTwo.usesCookiesOrMetrics}
-                    onChange={handleStepTwoChange('usesCookiesOrMetrics')}
-                  >
-                    <option value="Да">Да</option>
-                    <option value="Нет">Нет</option>
-                    <option value="Частично">Частично</option>
-                    <option value="Не уверен">Не уверен</option>
-                  </SelectField>
-                </SelectWrap>
-                <SelectWrap>
-                  <label htmlFor="filedNoticeBefore">Подавали ли уведомление в РКН</label>
-                  <SelectField id="filedNoticeBefore" value={stepTwo.filedNoticeBefore} onChange={handleStepTwoChange('filedNoticeBefore')}>
-                    <option value="Да">Да</option>
-                    <option value="Нет">Нет</option>
-                    <option value="Не знаю">Не знаю</option>
-                  </SelectField>
-                </SelectWrap>
-                <SelectWrap>
-                  <label htmlFor="needType">Что вам нужно</label>
-                  <SelectField id="needType" value={stepTwo.needType} onChange={handleStepTwoChange('needType')}>
-                    <option value="site_docs">Документы для сайта</option>
-                    <option value="rkn_notice">Уведомление РКН</option>
-                    <option value="full_package">Полный комплект</option>
-                    <option value="not_sure">Пока не знаю</option>
-                  </SelectField>
-                </SelectWrap>
-                <SelectWrap full>
-                  <label htmlFor="paymentIntent">Готовы ли вы оплатить подготовку комплекта, если стоимость будет в подходящем диапазоне?</label>
-                  <SelectField id="paymentIntent" value={stepTwo.paymentIntent} onChange={handleStepTwoChange('paymentIntent')}>
-                    <option value="ready_after_consultation">Да, готов(а) оплатить после консультации</option>
-                    <option value="want_exact_price">Хочу сначала узнать точную стоимость</option>
-                    <option value="researching">Пока изучаю варианты</option>
-                  </SelectField>
-                </SelectWrap>
-              </FormGrid>
-              {error && <ErrorText>{error}</ErrorText>}
-              <ButtonRow>
-                <GhostButton type="button" onClick={() => setStep(1)}>
-                  Назад
-                </GhostButton>
-                <PrimaryButton type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Отправляем…' : 'Получить предварительное предложение'}
-                </PrimaryButton>
-              </ButtonRow>
-            </FormCard>
-          )}
+            {step === 2 && (
+              <FormCard onSubmit={submitStepTwo}>
+                <FormGrid>
+                  <Field>
+                    <label htmlFor="hasForms">Есть ли формы на сайте</label>
+                    <Select id="hasForms" value={stepTwo.hasForms} onChange={handleStepTwoChange('hasForms')}>
+                      <option value="Да">Да</option>
+                      <option value="Нет">Нет</option>
+                      <option value="Не уверен">Не уверен</option>
+                    </Select>
+                  </Field>
+                  <Field>
+                    <label htmlFor="usesTools">Используете ли cookies / Метрику / CRM</label>
+                    <Select id="usesTools" value={stepTwo.usesTools} onChange={handleStepTwoChange('usesTools')}>
+                      <option value="Да">Да</option>
+                      <option value="Нет">Нет</option>
+                      <option value="Не уверен">Не уверен</option>
+                    </Select>
+                  </Field>
+                  <Field>
+                    <label htmlFor="hasEmployees">Есть ли сотрудники</label>
+                    <Select id="hasEmployees" value={stepTwo.hasEmployees} onChange={handleStepTwoChange('hasEmployees')}>
+                      <option value="Да">Да</option>
+                      <option value="Нет">Нет</option>
+                      <option value="Не уверен">Не уверен</option>
+                    </Select>
+                  </Field>
+                  <Field>
+                    <label htmlFor="filedNoticeBefore">Подавали ли уведомление в РКН</label>
+                    <Select id="filedNoticeBefore" value={stepTwo.filedNoticeBefore} onChange={handleStepTwoChange('filedNoticeBefore')}>
+                      <option value="Да">Да</option>
+                      <option value="Нет">Нет</option>
+                      <option value="Не знаю">Не знаю</option>
+                    </Select>
+                  </Field>
+                  <Field>
+                    <label htmlFor="needType">Что нужно</label>
+                    <Select id="needType" value={stepTwo.needType} onChange={handleStepTwoChange('needType')}>
+                      <option value="site_docs">Документы для сайта</option>
+                      <option value="rkn_notice">Уведомление РКН</option>
+                      <option value="full_package">Полный комплект</option>
+                      <option value="not_sure">Не знаю</option>
+                    </Select>
+                  </Field>
+                  <Field>
+                    <label htmlFor="paymentIntent">Готовность оплатить после согласования</label>
+                    <Select id="paymentIntent" value={stepTwo.paymentIntent} onChange={handleStepTwoChange('paymentIntent')}>
+                      <option value="yes">Да</option>
+                      <option value="need_price">Хочу сначала узнать стоимость</option>
+                      <option value="researching">Пока изучаю</option>
+                    </Select>
+                  </Field>
+                </FormGrid>
+                {error && <ErrorText>{error}</ErrorText>}
+                <ButtonRow>
+                  <SecondaryButton type="button" onClick={() => setStep(1)}>
+                    Назад
+                  </SecondaryButton>
+                  <PrimaryButton type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Отправляем…' : 'Отправить заявку'}
+                  </PrimaryButton>
+                </ButtonRow>
+              </FormCard>
+            )}
 
-          {step === 3 && (
-            <SuccessCard>
-              <SuccessTitle>Спасибо, заявку получили</SuccessTitle>
-              <SuccessText>
-                Мы предварительно определим, какой комплект документов может понадобиться вашему бизнесу, и
-                свяжемся с вами. Если решение подойдёт, специалист подтвердит состав работ, сроки и предложит
-                вариант оплаты.
-              </SuccessText>
-              <CheckList>
-                <li>Изучим вашу анкету</li>
-                <li>Определим предварительный состав комплекта</li>
-                <li>Подскажем, нужен ли блок по уведомлению РКН</li>
-                <li>Свяжемся для подтверждения деталей</li>
-              </CheckList>
-              <SmallNote>Оплата обсуждается только после подтверждения состава работ. Без автоматического списания на сайте.</SmallNote>
-            </SuccessCard>
-          )}
+            {step === 3 && (
+              <SuccessCard>
+                <SuccessTitle>Спасибо</SuccessTitle>
+                <SectionText>
+                  Мы изучим ответы, определим предварительный состав документов и свяжемся с вами для
+                  согласования стоимости. Оплата потребуется только после подтверждения состава работ.
+                </SectionText>
+              </SuccessCard>
+            )}
+          </WideCard>
         </Container>
-      </AltSection>
+      </Section>
 
-      <ContentSection>
+      <Section>
         <Container>
-          <SectionHeader>
-            <SectionEyebrow>FAQ</SectionEyebrow>
-            <SectionTitle>Частые вопросы</SectionTitle>
-          </SectionHeader>
-          <FaqList>
-            {faqItems.map((item) => (
-              <FaqItem key={item.question}>
-                <CardTitle>{item.question}</CardTitle>
-                <SectionText>{item.answer}</SectionText>
-              </FaqItem>
-            ))}
-          </FaqList>
+          <WideCard>
+            <SectionTitle>FAQ</SectionTitle>
+            <FaqList>
+              {faqItems.map((item) => (
+                <details
+                  key={item.question}
+                  onToggle={(event) => {
+                    if ((event.currentTarget as HTMLDetailsElement).open) {
+                      trackEvent('faq_open', { question: item.question });
+                    }
+                  }}
+                >
+                  <summary>{item.question}</summary>
+                  <FaqAnswer>{item.answer}</FaqAnswer>
+                </details>
+              ))}
+            </FaqList>
+          </WideCard>
         </Container>
-      </ContentSection>
+      </Section>
 
       <FooterSection>
         <Container>
           <FooterCard>
-            <SectionEyebrow>Финальный шаг</SectionEyebrow>
-            <SectionTitle>Ответьте на несколько вопросов — мы определим состав комплекта и подготовим предложение</SectionTitle>
+            <SectionTitle>Нужно быстро понять, что требуется именно вашему бизнесу?</SectionTitle>
             <SectionText>
-              Без мгновенной оплаты. Сначала — состав работ, предварительная стоимость и только потом обсуждение
-              оплаты со специалистом.
+              Оставьте заявку — мы определим предварительный состав комплекта и вернёмся с понятным предложением.
             </SectionText>
-            <PrimaryButton type="button" onClick={() => handleHeroCta('Начать с анкеты', 'primary')}>
+            <PrimaryButton type="button" onClick={() => goToForm('final_cta_click', 'Начать с анкеты')}>
               Начать с анкеты
             </PrimaryButton>
-            <FooterMeta>
-              Документы готовят специалисты по 152-ФЗ и юридическому сопровождению бизнеса. Решение не заменяет
-              комплексный аудит ИБ.
-            </FooterMeta>
           </FooterCard>
         </Container>
       </FooterSection>
-    </PageShell>
+    </Page>
   );
 };
 
 export default IndexPage;
 
-const PageShell = styled.main`
+const Page = styled.main`
   background: ${theme.colors.background};
   color: ${theme.colors.text};
-  min-height: 100vh;
 `;
 
 const Container = styled.div<{ narrow?: boolean }>`
-  width: min(1120px, calc(100% - 32px));
+  width: min(1080px, calc(100% - 32px));
   margin: 0 auto;
   ${({ narrow }): string => (narrow ? 'max-width: 860px;' : '')}
 `;
 
-const HeroSection = styled.section`
-  padding: 32px 0 72px;
-  background:
-    radial-gradient(circle at top right, rgba(70, 119, 255, 0.16), transparent 36%),
-    linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
-`;
-
-const TopBadge = styled.span`
-  display: inline-flex;
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: rgba(70, 119, 255, 0.1);
-  color: ${theme.colors.accent};
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 24px;
+const Hero = styled.section`
+  padding: 40px 0 28px;
 `;
 
 const HeroGrid = styled.div`
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 28px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 24px;
+  align-items: start;
 
-  @media (max-width: 920px) {
+  @media (max-width: 880px) {
     grid-template-columns: 1fr;
   }
 `;
 
+const HeroMain = styled.div`
+  padding: 8px 0;
+`;
+
+const Eyebrow = styled.div`
+  color: ${theme.colors.accent};
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+`;
+
 const HeroTitle = styled.h1`
-  font-size: clamp(40px, 6vw, 64px);
+  margin: 0 0 14px;
+  font-size: clamp(36px, 5vw, 52px);
   line-height: 1.02;
   letter-spacing: -0.04em;
-  margin: 0 0 20px;
   max-width: 760px;
 `;
 
 const HeroText = styled.p`
-  font-size: 20px;
-  line-height: 1.6;
+  margin: 0;
+  max-width: 700px;
   color: ${theme.colors.muted};
-  margin: 0 0 28px;
-  max-width: 760px;
+  font-size: 18px;
+  line-height: 1.65;
 `;
 
 const HeroActions = styled.div`
   display: flex;
-  flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 28px;
+  flex-wrap: wrap;
+  margin-top: 22px;
 `;
 
-const baseButton = `
-  border: none;
-  border-radius: 16px;
-  padding: 16px 22px;
+const TrustCard = styled.div`
+  padding: 22px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid ${theme.colors.border};
+  box-shadow: ${theme.shadow.md};
+`;
+
+const SummaryTitle = styled.h2`
+  margin: 0 0 12px;
+  font-size: 20px;
+  line-height: 1.3;
+`;
+
+const Section = styled.section`
+  padding: 16px 0 18px;
+`;
+
+const SectionHeader = styled.div`
+  margin-bottom: 18px;
+  max-width: 700px;
+`;
+
+const SectionTitle = styled.h2`
+  margin: 0 0 10px;
+  font-size: clamp(24px, 3.2vw, 32px);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+`;
+
+const SectionText = styled.p`
+  margin: 0;
+  color: ${theme.colors.muted};
   font-size: 16px;
+  line-height: 1.7;
+`;
+
+const CompactGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 18px;
+
+  @media (max-width: 880px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ContentCard = styled.div`
+  padding: 24px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid ${theme.colors.border};
+  box-shadow: ${theme.shadow.sm};
+`;
+
+const NoticeCard = styled(ContentCard)`
+  background: ${theme.colors.surface};
+`;
+
+const WideCard = styled.div`
+  padding: 24px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid ${theme.colors.border};
+  box-shadow: ${theme.shadow.sm};
+`;
+
+const BulletList = styled.ul`
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+  line-height: 1.6;
+`;
+
+const ResultGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ResultItem = styled.div`
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: ${theme.colors.surface};
+  line-height: 1.55;
+`;
+
+const ProcessGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ProcessItem = styled.div`
+  padding: 18px;
+  border-radius: 18px;
+  background: ${theme.colors.surface};
+`;
+
+const StepIndex = styled.div`
+  font-size: 12px;
+  font-weight: 700;
+  color: ${theme.colors.accent};
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+`;
+
+const ProcessText = styled.p`
+  margin: 0;
+  line-height: 1.6;
+`;
+
+const PricingGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const PricingCard = styled.div`
+  padding: 22px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid ${theme.colors.border};
+  box-shadow: ${theme.shadow.sm};
+  display: grid;
+  gap: 14px;
+`;
+
+const PricingTierLabel = styled.div`
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: ${theme.colors.accent};
+`;
+
+const PricingPrice = styled.div`
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+`;
+
+const PricingDescription = styled.p`
+  margin: 0;
+  color: ${theme.colors.muted};
+  line-height: 1.65;
+`;
+
+const CompactList = styled.ul`
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  line-height: 1.55;
+`;
+
+const MutedNote = styled.p`
+  margin: 14px 0 0;
+  color: ${theme.colors.muted};
+  font-size: 15px;
+  line-height: 1.65;
+`;
+
+const FormCard = styled.form`
+  margin-top: 16px;
+`;
+
+const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const Field = styled.div`
+  display: grid;
+  gap: 8px;
+
+  label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+`;
+
+const Input = styled.input`
+  min-height: 50px;
+  border-radius: 14px;
+  border: 1px solid ${theme.colors.border};
+  background: ${theme.colors.surface};
+  padding: 0 14px;
+`;
+
+const Select = styled.select`
+  min-height: 50px;
+  border-radius: 14px;
+  border: 1px solid ${theme.colors.border};
+  background: ${theme.colors.surface};
+  padding: 0 14px;
+`;
+
+const ErrorText = styled.div`
+  margin: 14px 0 0;
+  color: ${theme.colors.danger};
+  font-weight: 600;
+`;
+
+const SuccessCard = styled.div`
+  margin-top: 16px;
+  padding: 20px;
+  border-radius: 18px;
+  background: ${theme.colors.surface};
+`;
+
+const SuccessTitle = styled.h3`
+  margin: 0 0 8px;
+  font-size: 22px;
+`;
+
+const FaqList = styled.div`
+  display: grid;
+  gap: 10px;
+
+  details {
+    border-radius: 16px;
+    background: ${theme.colors.surface};
+    padding: 14px 16px;
+  }
+
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+`;
+
+const FaqAnswer = styled.p`
+  margin: 10px 0 0;
+  color: ${theme.colors.muted};
+  line-height: 1.6;
+`;
+
+const FooterSection = styled.section`
+  padding: 20px 0 48px;
+`;
+
+const FooterCard = styled.div`
+  padding: 28px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid ${theme.colors.border};
+  box-shadow: ${theme.shadow.sm};
+`;
+
+const ButtonRow = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+`;
+
+const buttonBase = `
+  min-height: 52px;
+  padding: 0 18px;
+  border-radius: 14px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 
   &:hover {
     transform: translateY(-1px);
@@ -911,10 +1004,11 @@ const baseButton = `
 `;
 
 const PrimaryButton = styled.button`
-  ${baseButton}
+  ${buttonBase}
+  border: none;
   background: ${theme.colors.accent};
   color: #ffffff;
-  box-shadow: 0 16px 32px rgba(70, 119, 255, 0.24);
+  box-shadow: 0 12px 28px rgba(70, 119, 255, 0.18);
 
   &:disabled {
     opacity: 0.7;
@@ -923,330 +1017,8 @@ const PrimaryButton = styled.button`
 `;
 
 const SecondaryButton = styled.button`
-  ${baseButton}
+  ${buttonBase}
+  border: 1px solid ${theme.colors.border};
   background: #ffffff;
   color: ${theme.colors.text};
-  border: 1px solid ${theme.colors.border};
-`;
-
-const GhostButton = styled.button`
-  ${baseButton}
-  background: transparent;
-  color: ${theme.colors.muted};
-  border: 1px solid ${theme.colors.border};
-`;
-
-const BenefitList = styled.ul`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-  padding: 0;
-  margin: 0 0 24px;
-  list-style: none;
-`;
-
-const BenefitItem = styled.li`
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: #ffffff;
-  border: 1px solid ${theme.colors.border};
-  color: ${theme.colors.text};
-  box-shadow: 0 8px 24px rgba(14, 24, 45, 0.06);
-`;
-
-const HeroNote = styled.p`
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.6;
-  color: ${theme.colors.muted};
-`;
-
-const HighlightCard = styled.div`
-  padding: 28px;
-  border-radius: 28px;
-  background: #0f1726;
-  color: #ffffff;
-  box-shadow: 0 30px 60px rgba(14, 24, 45, 0.2);
-`;
-
-const CardTitle = styled.h3`
-  margin: 0 0 16px;
-  font-size: 22px;
-  line-height: 1.3;
-`;
-
-const CheckList = styled.ul`
-  padding-left: 20px;
-  margin: 0;
-  display: grid;
-  gap: 12px;
-  color: inherit;
-  line-height: 1.6;
-`;
-
-const InlineMetric = styled.div`
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-  display: grid;
-  gap: 6px;
-
-  strong {
-    font-size: 28px;
-  }
-
-  span {
-    color: rgba(255, 255, 255, 0.8);
-  }
-`;
-
-const ContentSection = styled.section`
-  padding: 72px 0;
-`;
-
-const AltSection = styled.section`
-  padding: 72px 0;
-  background: ${theme.colors.surface};
-`;
-
-const SectionHeader = styled.div`
-  max-width: 760px;
-  margin-bottom: 32px;
-`;
-
-const SectionEyebrow = styled.div`
-  color: ${theme.colors.accent};
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 14px;
-`;
-
-const SectionTitle = styled.h2`
-  margin: 0 0 14px;
-  font-size: clamp(30px, 4.5vw, 48px);
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-`;
-
-const SectionText = styled.p`
-  margin: 0;
-  color: ${theme.colors.muted};
-  font-size: 18px;
-  line-height: 1.7;
-`;
-
-const Grid = styled.div<{ columns: string }>`
-  display: grid;
-  grid-template-columns: ${({ columns }): string => columns};
-  gap: 18px;
-`;
-
-const Card = styled.div`
-  padding: 24px;
-  border-radius: 24px;
-  background: #ffffff;
-  border: 1px solid ${theme.colors.border};
-  box-shadow: 0 18px 44px rgba(14, 24, 45, 0.06);
-`;
-
-const Disclaimer = styled.p`
-  margin: 24px 0 0;
-  color: ${theme.colors.muted};
-  font-size: 15px;
-  line-height: 1.7;
-`;
-
-const BodyNote = styled.p`
-  margin: 24px 0 0;
-  color: ${theme.colors.muted};
-  font-size: 17px;
-  line-height: 1.7;
-`;
-
-const StepsList = styled.div`
-  display: grid;
-  gap: 16px;
-`;
-
-const StepCard = styled.div`
-  display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 18px;
-  align-items: center;
-  padding: 22px 24px;
-  background: #ffffff;
-  border: 1px solid ${theme.colors.border};
-  border-radius: 24px;
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const StepNumber = styled.div`
-  width: 72px;
-  height: 72px;
-  display: grid;
-  place-items: center;
-  border-radius: 20px;
-  background: rgba(70, 119, 255, 0.1);
-  color: ${theme.colors.accent};
-  font-size: 22px;
-  font-weight: 800;
-`;
-
-const StepText = styled.p`
-  margin: 0;
-  font-size: 18px;
-  line-height: 1.6;
-`;
-
-const PricingCard = styled(Card)`
-  display: grid;
-  gap: 18px;
-`;
-
-const PricingTier = styled.div`
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: ${theme.colors.accent};
-`;
-
-const PricingPrice = styled.div`
-  font-size: 42px;
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-`;
-
-const PricingText = styled.p`
-  margin: 0;
-  color: ${theme.colors.muted};
-  line-height: 1.7;
-`;
-
-const FormCard = styled.form`
-  padding: 28px;
-  background: #ffffff;
-  border: 1px solid ${theme.colors.border};
-  border-radius: 28px;
-  box-shadow: 0 22px 48px rgba(14, 24, 45, 0.08);
-`;
-
-const FormGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-
-  @media (max-width: 720px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const InputWrap = styled.div<{ full?: boolean }>`
-  display: grid;
-  gap: 8px;
-  ${({ full }): string => (full ? 'grid-column: 1 / -1;' : '')}
-
-  label {
-    font-weight: 600;
-  }
-`;
-
-const SelectWrap = styled(InputWrap)``;
-
-const TextInput = styled.input`
-  border: 1px solid ${theme.colors.border};
-  border-radius: 14px;
-  padding: 14px 16px;
-  font-size: 16px;
-  min-height: 52px;
-  background: ${theme.colors.surface};
-`;
-
-const SelectField = styled.select`
-  border: 1px solid ${theme.colors.border};
-  border-radius: 14px;
-  padding: 14px 16px;
-  font-size: 16px;
-  min-height: 52px;
-  background: ${theme.colors.surface};
-`;
-
-const ErrorText = styled.div`
-  margin: 16px 0;
-  color: #b42318;
-  font-weight: 600;
-`;
-
-const SmallNote = styled.p`
-  margin: 14px 0 0;
-  color: ${theme.colors.muted};
-  font-size: 14px;
-  line-height: 1.6;
-`;
-
-const ButtonRow = styled.div`
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-`;
-
-const SuccessCard = styled.div`
-  padding: 28px;
-  background: #ffffff;
-  border: 1px solid ${theme.colors.border};
-  border-radius: 28px;
-  box-shadow: 0 22px 48px rgba(14, 24, 45, 0.08);
-`;
-
-const SuccessTitle = styled.h3`
-  margin: 0 0 12px;
-  font-size: 30px;
-`;
-
-const SuccessText = styled.p`
-  margin: 0 0 16px;
-  color: ${theme.colors.muted};
-  font-size: 18px;
-  line-height: 1.7;
-`;
-
-const FaqList = styled.div`
-  display: grid;
-  gap: 16px;
-`;
-
-const FaqItem = styled.div`
-  padding: 24px;
-  border-radius: 24px;
-  border: 1px solid ${theme.colors.border};
-  background: #ffffff;
-`;
-
-const FooterSection = styled.section`
-  padding: 72px 0 88px;
-`;
-
-const FooterCard = styled.div`
-  padding: 36px;
-  border-radius: 32px;
-  background: linear-gradient(135deg, #0f1726 0%, #1d2a44 100%);
-  color: #ffffff;
-  box-shadow: 0 28px 64px rgba(14, 24, 45, 0.22);
-
-  ${SectionTitle}, ${SectionText}, ${SectionEyebrow} {
-    color: #ffffff;
-  }
-`;
-
-const FooterMeta = styled.p`
-  margin: 20px 0 0;
-  color: rgba(255, 255, 255, 0.78);
-  line-height: 1.7;
 `;
