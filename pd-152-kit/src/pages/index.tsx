@@ -2,7 +2,7 @@ import React, { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'rea
 import styled from 'styled-components';
 import { GlobalStyles } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
-import heroIllustration from '../images/pd152-hero-illustration.png';
+import heroIllustration from '../images/pd152-hero-visual-polish.png';
 
 type PricingTier = 'Базовый' | 'Стандарт' | 'Расширенный' | 'Не знаю';
 type FormStep = 1 | 2 | 3;
@@ -602,6 +602,7 @@ const IndexPage: React.FC = () => {
       <Section id="lead-form">
         <Container narrow>
           <FormPanel>
+            {stepOne.selectedTariff ? <SelectedTariffNotice>Вы выбрали: {stepOne.selectedTariff}</SelectedTariffNotice> : null}
             <FormPanelHeader>
               <SectionTitle>Заявка</SectionTitle>
               <SectionText>
@@ -845,7 +846,7 @@ const Section = styled.section`
 `;
 
 const TintSection = styled(Section)`
-  background: ${theme.colors.backgroundAlt};
+  background: transparent;
 `;
 
 const HeroSection = styled.section`
@@ -916,12 +917,30 @@ const HeroActions = styled.div`
 `;
 
 const HeroVisualWrap = styled.div`
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+`;
+
+const HeroVisualCard = styled.div`
+  width: 100%;
+  max-width: 520px;
+  border-radius: 16px;
+  border: 1px solid ${theme.colors.border};
+  background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(243,244,248,0.92) 100%);
+  box-shadow: ${theme.shadow.sm};
+  padding: 16px;
+`;
+
+const HeroGlow = styled.div`
   display: none;
 `;
 
-const HeroVisualCard = styled.div``;
-const HeroGlow = styled.div``;
-const HeroVisualImage = styled.img``;
+const HeroVisualImage = styled.img`
+  width: 100%;
+  display: block;
+  border-radius: 12px;
+`;
 
 const TrustGrid = styled.div`
   display: flex;
@@ -1006,12 +1025,13 @@ const FeatureCard = styled.div`
   border-radius: 12px;
   background: ${theme.colors.surface};
   border: 1px solid ${theme.colors.border};
-  box-shadow: ${theme.shadow.sm};
-  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 
   &:hover {
     border-color: ${theme.colors.accent};
-    box-shadow: ${theme.shadow.md};
+    box-shadow: ${theme.shadow.sm};
+    background: #FCFDFF;
   }
 `;
 
@@ -1058,12 +1078,13 @@ const ServiceCard = styled.div`
   border-radius: 12px;
   background: ${theme.colors.surface};
   border: 1px solid ${theme.colors.border};
-  box-shadow: ${theme.shadow.sm};
-  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 
   &:hover {
     border-color: ${theme.colors.accent};
-    box-shadow: ${theme.shadow.md};
+    box-shadow: ${theme.shadow.sm};
+    background: #FCFDFF;
   }
 `;
 
@@ -1110,12 +1131,13 @@ const StepCard = styled.div`
   border-radius: 12px;
   background: ${theme.colors.surface};
   border: 1px solid ${theme.colors.border};
-  box-shadow: ${theme.shadow.sm};
-  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 
   &:hover {
     border-color: ${theme.colors.accent};
-    box-shadow: ${theme.shadow.md};
+    box-shadow: ${theme.shadow.sm};
+    background: #FCFDFF;
   }
 `;
 
@@ -1180,7 +1202,8 @@ const PricingCard = styled.div<{ $featured: boolean }>`
 
   &:hover {
     border-color: ${theme.colors.accent};
-    box-shadow: ${theme.shadow.md};
+    box-shadow: ${theme.shadow.sm};
+    background: #FCFDFF;
   }
 
   @media (max-width: 640px) {
@@ -1301,7 +1324,20 @@ const FormPanel = styled.div`
 `;
 
 const FormPanelHeader = styled.div`
-  margin-bottom: 28px;
+  margin-bottom: 24px;
+`;
+
+const SelectedTariffNotice = styled.div`
+  margin-bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: ${theme.colors.accentSoft};
+  color: ${theme.colors.accentStrong};
+  font-size: 13px;
+  font-weight: 700;
 `;
 
 const FormCard = styled.form``;
@@ -1461,15 +1497,23 @@ const FaqCard = styled.div`
 
   &:hover {
     border-color: ${theme.colors.accent};
-    box-shadow: ${theme.shadow.md};
+    box-shadow: ${theme.shadow.sm};
+    background: #FCFDFF;
   }
+
+  overflow: hidden;
 
   details {
     padding: 20px;
+    border-radius: 12px;
   }
 
   details:not([open]):hover {
     background: #F7F8FA;
+  }
+
+  details:focus-within {
+    outline: none;
   }
 
   summary {
@@ -1517,17 +1561,19 @@ const FooterMini = styled.div`
   align-items: center;
   text-align: center;
   gap: 16px;
-  padding: 80px 0;
-  background: #111827;
-  border-radius: 12px;
+  padding: 36px 28px;
+  background: linear-gradient(180deg, rgba(239,246,255,1) 0%, rgba(255,255,255,1) 100%);
+  border: 1px solid ${theme.colors.border};
+  border-radius: 16px;
 `;
 
 const FooterMiniText = styled.p`
   margin: 0;
-  color: #fff;
-  font-size: 28px;
+  color: ${theme.colors.text};
+  font-size: 22px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.4;
+  max-width: 760px;
 `;
 
 const FooterMiniButton = styled.button`
@@ -1535,11 +1581,11 @@ const FooterMiniButton = styled.button`
   padding: 0 18px;
   border-radius: 12px;
   border: none;
-  background: #fff;
-  color: ${theme.colors.accent};
+  background: ${theme.colors.accent};
+  color: #fff;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,.2);
+  box-shadow: 0 4px 16px rgba(37,99,235,.18);
 `;
 
 const SvgIcon = styled.svg`
