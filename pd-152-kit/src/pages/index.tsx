@@ -813,12 +813,12 @@ const Container = styled.div<{ narrow?: boolean }>`
 `;
 
 const Section = styled.section`
-  padding-top: 40px;
-  padding-bottom: 40px;
+  padding-top: 28px;
+  padding-bottom: 28px;
 
   @media (max-width: 768px) {
-    padding-top: 32px;
-    padding-bottom: 32px;
+    padding-top: 24px;
+    padding-bottom: 24px;
   }
 `;
 
@@ -1077,7 +1077,7 @@ const TrustText = styled.p<{ $strong?: boolean }>`
 
 const SectionHeader = styled.div`
   max-width: 760px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 `;
 
 const SectionLabel = styled.span`
