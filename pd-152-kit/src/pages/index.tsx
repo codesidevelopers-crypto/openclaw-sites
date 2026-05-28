@@ -137,9 +137,18 @@ const results = [
 ];
 
 const processSteps = [
-  'Заполняете короткую анкету о бизнесе',
-  'Мы определяем состав документов и согласуем стоимость',
-  'Готовим комплект и инструкцию за 7–14 дней',
+  {
+    title: 'Короткая анкета о бизнесе',
+    text: 'Рассказываете, как собираете данные: сайт, формы, cookies, CRM, сотрудники и подрядчики.',
+  },
+  {
+    title: 'Состав и стоимость',
+    text: 'Мы определяем, какие документы нужны именно вам, и согласуем стоимость до начала работ.',
+  },
+  {
+    title: 'Готовый комплект за 7–14 дней',
+    text: 'Подготавливаем документы и инструкцию по размещению и дальнейшим шагам.',
+  },
 ];
 
 const pricing = [
@@ -159,6 +168,7 @@ const pricing = [
     price: 'от 49 900 ₽',
     description: 'Для бизнеса с сайтом, CRM, клиентской базой и сотрудниками.',
     items: ['Всё из базового', 'Документы по сотрудникам', 'Расширенная проработка процессов', 'Уведомление РКН и инструкция по подаче'],
+    featured: true,
   },
   {
     tier: 'Расширенный' as PricingTier,
@@ -248,10 +258,17 @@ const IconFlow = (): React.ReactElement => (
   </SvgIcon>
 );
 
+const IconCheck = (): React.ReactElement => (
+  <SvgIcon viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M20 7 10 17l-4.5-4.5" />
+  </SvgIcon>
+);
+
 const resultIcons = [IconDoc, IconShield, IconCookie, IconUsers, IconDoc, IconFlow] as const;
 const audienceIcons = [IconFlow, IconCookie, IconUsers, IconFlow, IconShield, IconDoc] as const;
 const processIcons = [IconDoc, IconShield, IconFlow] as const;
 const pricingIcons = [IconDoc, IconShield, IconFlow] as const;
+const trustIcons = [IconCheck, IconShield, IconDoc, IconFlow] as const;
 
 const IndexPage: React.FC = () => {
   const [step, setStep] = useState<FormStep>(1);
@@ -298,7 +315,7 @@ const IndexPage: React.FC = () => {
           }
         });
       },
-      { threshold: 0.35 }
+      { threshold: 0.3 }
     );
 
     observer.observe(pricingSection);
@@ -407,7 +424,7 @@ const IndexPage: React.FC = () => {
     <Page>
       <GlobalStyles />
 
-      <Hero>
+      <HeroSection>
         <Container>
           <HeroGrid>
             <HeroMain>
@@ -425,50 +442,59 @@ const IndexPage: React.FC = () => {
                   Проверить, что нужно
                 </SecondaryButton>
               </HeroActions>
-              <TrustStrip>
-                {trustPoints.map((point) => (
-                  <TrustItem key={point}>{point}</TrustItem>
-                ))}
-              </TrustStrip>
+              <TrustGrid>
+                {trustPoints.map((point, index) => {
+                  const Icon = trustIcons[index];
+                  return (
+                    <TrustCard key={point}>
+                      <TrustIcon>
+                        <Icon />
+                      </TrustIcon>
+                      <TrustText>{point}</TrustText>
+                    </TrustCard>
+                  );
+                })}
+              </TrustGrid>
             </HeroMain>
 
-            <HeroVisual>
-              <VisualCard>
-                <VisualImage src={heroIllustration} alt="Схематичная иллюстрация комплекта документов и формы сайта" />
-              </VisualCard>
-            </HeroVisual>
+            <HeroVisualWrap>
+              <HeroVisualCard>
+                <HeroGlow />
+                <HeroVisualImage src={heroIllustration} alt="Иллюстрация формы сайта и комплекта документов" />
+              </HeroVisualCard>
+            </HeroVisualWrap>
           </HeroGrid>
         </Container>
-      </Hero>
+      </HeroSection>
 
-      <Section>
+      <TintSection>
         <Container>
           <SectionHeader>
             <SectionTitle>Кому это актуально</SectionTitle>
           </SectionHeader>
-          <MiniGrid>
+          <FeatureGrid>
             {audienceItems.map((item, index) => {
               const Icon = audienceIcons[index];
               return (
-                <MiniCard key={item}>
-                  <IconWrap>
+                <FeatureCard key={item}>
+                  <FeatureIcon>
                     <Icon />
-                  </IconWrap>
-                  <MiniCardText>{item}</MiniCardText>
-                </MiniCard>
+                  </FeatureIcon>
+                  <FeatureText>{item}</FeatureText>
+                </FeatureCard>
               );
             })}
-          </MiniGrid>
+          </FeatureGrid>
         </Container>
-      </Section>
+      </TintSection>
 
       <Section>
         <Container>
-          <InlineNotice>
+          <InfoStrip>
             Если персональные данные собираются, но документы, согласия и уведомления оформлены неправильно, это
             приводит к риску претензий, спешной переделке процессов и возможным штрафам. Мы помогаем заранее
             привести это в порядок.
-          </InlineNotice>
+          </InfoStrip>
         </Container>
       </Section>
 
@@ -477,45 +503,46 @@ const IndexPage: React.FC = () => {
           <SectionHeader>
             <SectionTitle>Что вы получите</SectionTitle>
           </SectionHeader>
-          <MiniGrid>
+          <ServiceGrid>
             {results.map((item, index) => {
               const Icon = resultIcons[index];
               return (
-                <MiniCard key={item}>
-                  <IconWrap>
+                <ServiceCard key={item}>
+                  <ServiceIcon>
                     <Icon />
-                  </IconWrap>
-                  <MiniCardText>{item}</MiniCardText>
-                </MiniCard>
+                  </ServiceIcon>
+                  <ServiceText>{item}</ServiceText>
+                </ServiceCard>
               );
             })}
-          </MiniGrid>
+          </ServiceGrid>
         </Container>
       </Section>
 
-      <Section>
+      <TintSection>
         <Container>
           <SectionHeader>
             <SectionTitle>Как это работает</SectionTitle>
           </SectionHeader>
-          <ProcessGrid>
+          <StepsGrid>
             {processSteps.map((item, index) => {
               const Icon = processIcons[index];
               return (
-                <ProcessCard key={item}>
-                  <ProcessTop>
-                    <IconBadge>
+                <StepCard key={item.title}>
+                  <StepHead>
+                    <StepIcon>
                       <Icon />
-                    </IconBadge>
-                    <StepIndex>0{index + 1}</StepIndex>
-                  </ProcessTop>
-                  <ProcessText>{item}</ProcessText>
-                </ProcessCard>
+                    </StepIcon>
+                    <StepNumber>0{index + 1}</StepNumber>
+                  </StepHead>
+                  <StepTitle>{item.title}</StepTitle>
+                  <StepDescription>{item.text}</StepDescription>
+                </StepCard>
               );
             })}
-          </ProcessGrid>
+          </StepsGrid>
         </Container>
-      </Section>
+      </TintSection>
 
       <Section id="pricing">
         <Container>
@@ -530,20 +557,21 @@ const IndexPage: React.FC = () => {
             {pricing.map((item, index) => {
               const Icon = pricingIcons[index];
               return (
-                <PricingCard key={item.tier}>
+                <PricingCard key={item.tier} $featured={Boolean(item.featured)}>
+                  {item.featured && <PricingBadge>Оптимальный выбор</PricingBadge>}
                   <PricingTop>
-                    <IconBadge>
+                    <PricingIcon>
                       <Icon />
-                    </IconBadge>
-                    <PricingTierLabel>{item.tier}</PricingTierLabel>
+                    </PricingIcon>
+                    <PricingTier>{item.tier}</PricingTier>
                   </PricingTop>
                   <PricingPrice>{item.price}</PricingPrice>
                   <PricingDescription>{item.description}</PricingDescription>
-                  <CompactList>
+                  <PricingList>
                     {item.items.map((priceItem) => (
                       <li key={priceItem}>{priceItem}</li>
                     ))}
-                  </CompactList>
+                  </PricingList>
                   <PrimaryButton type="button" onClick={() => handleTariffClick(item.tier)}>
                     Выбрать тариф
                   </PrimaryButton>
@@ -551,23 +579,23 @@ const IndexPage: React.FC = () => {
               );
             })}
           </PricingGrid>
-          <MutedNote>
+          <PricingNote>
             Финальная стоимость зависит от состава документов и подтверждается после анкеты. Оплата — только после
             согласования работ.
-          </MutedNote>
+          </PricingNote>
         </Container>
       </Section>
 
       <Section id="lead-form">
         <Container narrow>
-          <FormShell>
-            <SectionHeader>
+          <FormPanel>
+            <FormPanelHeader>
               <SectionTitle>Заявка</SectionTitle>
               <SectionText>
                 Оставьте контакты и ответьте на несколько вопросов. Мы определим предварительный состав комплекта и
-                свяжемся для согласования стоимости.
+                свяжемся с вами для согласования стоимости.
               </SectionText>
-            </SectionHeader>
+            </FormPanelHeader>
 
             {step === 1 && (
               <FormCard onSubmit={submitStepOne}>
@@ -683,18 +711,18 @@ const IndexPage: React.FC = () => {
                 </SectionText>
               </SuccessCard>
             )}
-          </FormShell>
+          </FormPanel>
         </Container>
       </Section>
 
-      <Section>
+      <TintSection>
         <Container>
           <SectionHeader>
             <SectionTitle>FAQ</SectionTitle>
           </SectionHeader>
           <FaqGrid>
             {faqItems.map((item) => (
-              <FaqItem key={item.question}>
+              <FaqCard key={item.question}>
                 <details
                   onToggle={(event) => {
                     if ((event.currentTarget as HTMLDetailsElement).open) {
@@ -705,9 +733,20 @@ const IndexPage: React.FC = () => {
                   <summary>{item.question}</summary>
                   <FaqAnswer>{item.answer}</FaqAnswer>
                 </details>
-              </FaqItem>
+              </FaqCard>
             ))}
           </FaqGrid>
+        </Container>
+      </TintSection>
+
+      <Section>
+        <Container>
+          <FooterMini>
+            <FooterMiniText>Короткая анкета → предварительный состав работ → согласование стоимости → подготовка комплекта.</FooterMiniText>
+            <FooterMiniButton type="button" onClick={() => goToForm('final_cta_click', 'Получить расчёт внизу страницы')}>
+              Оставить заявку
+            </FooterMiniButton>
+          </FooterMini>
         </Container>
       </Section>
     </Page>
@@ -718,55 +757,52 @@ export default IndexPage;
 
 const Page = styled.main`
   background:
-    radial-gradient(circle at top right, rgba(70, 119, 255, 0.08), transparent 26%),
-    ${theme.colors.background};
+    radial-gradient(circle at top right, rgba(49, 94, 251, 0.08), transparent 26%),
+    linear-gradient(180deg, #fbfcff 0%, ${theme.colors.background} 32%, ${theme.colors.background} 100%);
   color: ${theme.colors.text};
 `;
 
 const Container = styled.div<{ narrow?: boolean }>`
-  width: min(1100px, calc(100% - 32px));
+  width: min(1140px, calc(100% - 40px));
   margin: 0 auto;
-  ${({ narrow }): string => (narrow ? 'max-width: 860px;' : '')}
+  ${({ narrow }): string => (narrow ? 'max-width: 900px;' : '')}
 `;
 
-const Hero = styled.section`
-  padding: 34px 0 26px;
+const Section = styled.section`
+  padding: 92px 0;
+
+  @media (max-width: 768px) {
+    padding: 72px 0;
+  }
+`;
+
+const TintSection = styled(Section)`
+  background: ${theme.colors.backgroundAlt};
+`;
+
+const HeroSection = styled.section`
+  padding: 64px 0 108px;
+
+  @media (max-width: 768px) {
+    padding: 48px 0 80px;
+  }
 `;
 
 const HeroGrid = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.98fr);
+  gap: 40px;
   align-items: center;
 
-  @media (max-width: 920px) {
+  @media (max-width: 980px) {
     grid-template-columns: 1fr;
+    gap: 32px;
   }
 `;
 
 const HeroMain = styled.div`
   display: grid;
-  gap: 16px;
-`;
-
-const HeroVisual = styled.div`
-  display: flex;
-  justify-content: center;
-`;
-
-const VisualCard = styled.div`
-  width: 100%;
-  max-width: 460px;
-  padding: 18px;
-  border-radius: 28px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 248, 252, 0.98) 100%);
-  border: 1px solid rgba(217, 226, 240, 0.9);
-  box-shadow: 0 24px 60px rgba(15, 23, 38, 0.08);
-`;
-
-const VisualImage = styled.img`
-  width: 100%;
-  border-radius: 18px;
+  gap: 22px;
 `;
 
 const Eyebrow = styled.div`
@@ -774,35 +810,70 @@ const Eyebrow = styled.div`
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
 `;
 
 const HeroTitle = styled.h1`
   margin: 0;
-  max-width: 680px;
-  font-size: clamp(34px, 5vw, 50px);
-  line-height: 1.02;
-  letter-spacing: -0.045em;
+  max-width: 720px;
+  font-size: clamp(40px, 5.5vw, 64px);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
 `;
 
 const HeroText = styled.p`
   margin: 0;
-  max-width: 670px;
+  max-width: 700px;
   color: ${theme.colors.muted};
-  font-size: 18px;
-  line-height: 1.62;
+  font-size: 19px;
+  line-height: 1.7;
 `;
 
 const HeroActions = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
+  padding-top: 4px;
 `;
 
-const TrustStrip = styled.div`
+const HeroVisualWrap = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const HeroVisualCard = styled.div`
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  padding: 26px;
+  border-radius: 34px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(242, 245, 251, 0.98) 100%);
+  border: 1px solid rgba(220, 228, 242, 0.95);
+  box-shadow: ${theme.shadow.xl};
+  overflow: hidden;
+`;
+
+const HeroGlow = styled.div`
+  position: absolute;
+  inset: auto -12% -22% auto;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(49, 94, 251, 0.14) 0%, rgba(49, 94, 251, 0) 70%);
+  pointer-events: none;
+`;
+
+const HeroVisualImage = styled.img`
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  border-radius: 22px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
+`;
+
+const TrustGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 14px;
   margin-top: 4px;
 
   @media (max-width: 640px) {
@@ -810,106 +881,187 @@ const TrustStrip = styled.div`
   }
 `;
 
-const TrustItem = styled.div`
-  padding: 14px 16px;
-  border-radius: 16px;
+const TrustCard = styled.div`
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 18px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid ${theme.colors.border};
   box-shadow: ${theme.shadow.sm};
-  font-size: 14px;
-  line-height: 1.5;
 `;
 
-const Section = styled.section`
-  padding: 14px 0 18px;
+const TrustIcon = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: ${theme.colors.accentSoft};
+  color: ${theme.colors.accent};
+`;
+
+const TrustText = styled.p`
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
 `;
 
 const SectionHeader = styled.div`
-  margin-bottom: 16px;
-  max-width: 720px;
+  max-width: 760px;
+  margin-bottom: 34px;
 `;
 
 const SectionTitle = styled.h2`
-  margin: 0 0 8px;
-  font-size: clamp(24px, 3vw, 32px);
-  line-height: 1.14;
-  letter-spacing: -0.035em;
+  margin: 0 0 12px;
+  font-size: clamp(28px, 3.6vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
 `;
 
 const SectionText = styled.p`
   margin: 0;
   color: ${theme.colors.muted};
-  font-size: 16px;
-  line-height: 1.68;
+  font-size: 17px;
+  line-height: 1.72;
 `;
 
-const MiniGrid = styled.div`
+const FeatureGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 22px;
 
-  @media (max-width: 900px) {
+  @media (max-width: 920px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (max-width: 560px) {
+  @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const MiniCard = styled.div`
+const FeatureCard = styled.div`
   display: grid;
-  grid-template-columns: 42px 1fr;
-  gap: 12px;
+  grid-template-columns: 48px 1fr;
+  gap: 16px;
   align-items: start;
-  padding: 18px;
-  border-radius: 20px;
-  background: #ffffff;
+  padding: 28px;
+  border-radius: 24px;
+  background: ${theme.colors.surface};
   border: 1px solid ${theme.colors.border};
+  box-shadow: ${theme.shadow.sm};
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${theme.shadow.md};
+    border-color: ${theme.colors.borderStrong};
+  }
+`;
+
+const FeatureIcon = styled.div`
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(180deg, ${theme.colors.accentSoft} 0%, #f2f5ff 100%);
+  color: ${theme.colors.accent};
+`;
+
+const FeatureText = styled.p`
+  margin: 0;
+  line-height: 1.62;
+`;
+
+const InfoStrip = styled.div`
+  padding: 26px 30px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(232, 238, 255, 0.95) 0%, rgba(242, 245, 251, 0.98) 100%);
+  border: 1px solid rgba(49, 94, 251, 0.12);
+  color: ${theme.colors.text};
+  line-height: 1.72;
   box-shadow: ${theme.shadow.sm};
 `;
 
-const MiniCardText = styled.p`
-  margin: 0;
-  line-height: 1.55;
-`;
-
-const InlineNotice = styled.div`
-  padding: 18px 20px;
-  border-radius: 20px;
-  background: linear-gradient(180deg, rgba(70, 119, 255, 0.08) 0%, rgba(70, 119, 255, 0.03) 100%);
-  border: 1px solid rgba(70, 119, 255, 0.16);
-  color: ${theme.colors.text};
-  line-height: 1.65;
-`;
-
-const ProcessGrid = styled.div`
+const ServiceGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 22px;
 
-  @media (max-width: 860px) {
+  @media (max-width: 920px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const ProcessCard = styled.div`
-  padding: 18px;
-  border-radius: 20px;
-  background: #ffffff;
+const ServiceCard = styled.div`
+  display: grid;
+  gap: 18px;
+  padding: 28px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
   border: 1px solid ${theme.colors.border};
   box-shadow: ${theme.shadow.sm};
 `;
 
-const ProcessTop = styled.div`
+const ServiceIcon = styled.div`
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(180deg, ${theme.colors.accentSoft} 0%, #f4f7ff 100%);
+  color: ${theme.colors.accent};
+`;
+
+const ServiceText = styled.p`
+  margin: 0;
+  line-height: 1.62;
+`;
+
+const StepsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+
+  @media (max-width: 920px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const StepCard = styled.div`
+  padding: 30px;
+  border-radius: 26px;
+  background: ${theme.colors.surface};
+  border: 1px solid ${theme.colors.border};
+  box-shadow: ${theme.shadow.sm};
+`;
+
+const StepHead = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 14px;
+  margin-bottom: 18px;
 `;
 
-const StepIndex = styled.div`
+const StepIcon = styled.div`
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: ${theme.colors.accentSoft};
+  color: ${theme.colors.accent};
+`;
+
+const StepNumber = styled.div`
   color: ${theme.colors.accent};
   font-size: 12px;
   font-weight: 700;
@@ -917,38 +1069,71 @@ const StepIndex = styled.div`
   letter-spacing: 0.08em;
 `;
 
-const ProcessText = styled.p`
+const StepTitle = styled.h3`
+  margin: 0 0 10px;
+  font-size: 20px;
+  line-height: 1.3;
+`;
+
+const StepDescription = styled.p`
   margin: 0;
-  line-height: 1.6;
+  color: ${theme.colors.muted};
+  line-height: 1.68;
 `;
 
 const PricingGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 22px;
 
-  @media (max-width: 920px) {
+  @media (max-width: 980px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const PricingCard = styled.div`
-  padding: 20px;
-  border-radius: 24px;
-  background: #ffffff;
-  border: 1px solid ${theme.colors.border};
-  box-shadow: ${theme.shadow.sm};
+const PricingCard = styled.div<{ $featured: boolean }>`
+  position: relative;
   display: grid;
-  gap: 14px;
+  gap: 18px;
+  padding: ${({ $featured }): string => ($featured ? '32px' : '28px')};
+  border-radius: 28px;
+  background: ${({ $featured }): string =>
+    $featured
+      ? 'linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(238,243,255,0.88) 100%)'
+      : 'linear-gradient(180deg, #ffffff 0%, #fbfcff 100%)'};
+  border: 1px solid ${({ $featured }): string => ($featured ? theme.colors.accentSoft : theme.colors.border)};
+  box-shadow: ${({ $featured }): string => ($featured ? theme.shadow.lg : theme.shadow.sm)};
+`;
+
+const PricingBadge = styled.div`
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: ${theme.colors.accentSoft};
+  color: ${theme.colors.accentStrong};
+  font-size: 12px;
+  font-weight: 700;
 `;
 
 const PricingTop = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 `;
 
-const PricingTierLabel = styled.div`
+const PricingIcon = styled.div`
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: ${theme.colors.accentSoft};
+  color: ${theme.colors.accent};
+`;
+
+const PricingTier = styled.div`
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
@@ -957,39 +1142,47 @@ const PricingTierLabel = styled.div`
 `;
 
 const PricingPrice = styled.div`
-  font-size: 34px;
+  font-size: 38px;
   line-height: 1;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.05em;
 `;
 
 const PricingDescription = styled.p`
   margin: 0;
   color: ${theme.colors.muted};
-  line-height: 1.65;
+  line-height: 1.7;
 `;
 
-const CompactList = styled.ul`
+const PricingList = styled.ul`
   margin: 0;
-  padding-left: 18px;
+  padding-left: 20px;
   display: grid;
-  gap: 8px;
-  line-height: 1.55;
+  gap: 10px;
+  line-height: 1.62;
 `;
 
-const MutedNote = styled.p`
-  margin: 14px 0 0;
+const PricingNote = styled.p`
+  margin: 22px 0 0;
   color: ${theme.colors.muted};
   font-size: 15px;
-  line-height: 1.65;
+  line-height: 1.68;
 `;
 
-const FormShell = styled.div`
-  padding: 22px;
-  border-radius: 24px;
-  background: #ffffff;
+const FormPanel = styled.div`
+  padding: 34px;
+  border-radius: 30px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 255, 0.92) 100%);
   border: 1px solid ${theme.colors.border};
-  box-shadow: ${theme.shadow.md};
+  box-shadow: ${theme.shadow.lg};
+
+  @media (max-width: 640px) {
+    padding: 24px;
+  }
+`;
+
+const FormPanelHeader = styled.div`
+  margin-bottom: 28px;
 `;
 
 const FormCard = styled.form``;
@@ -997,86 +1190,105 @@ const FormCard = styled.form``;
 const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-
-  @media (max-width: 720px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const Field = styled.div`
-  display: grid;
-  gap: 8px;
-
-  label {
-    font-size: 14px;
-    font-weight: 600;
-  }
-`;
-
-const Input = styled.input`
-  min-height: 50px;
-  border-radius: 14px;
-  border: 1px solid ${theme.colors.border};
-  background: ${theme.colors.surface};
-  padding: 0 14px;
-`;
-
-const Select = styled.select`
-  min-height: 50px;
-  border-radius: 14px;
-  border: 1px solid ${theme.colors.border};
-  background: ${theme.colors.surface};
-  padding: 0 14px;
-`;
-
-const ErrorText = styled.div`
-  margin: 14px 0 0;
-  color: ${theme.colors.danger};
-  font-weight: 600;
-`;
-
-const FormActions = styled.div`
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 16px;
-`;
-
-const SuccessCard = styled.div`
-  padding: 18px;
-  border-radius: 18px;
-  background: ${theme.colors.surface};
-`;
-
-const SuccessTitle = styled.h3`
-  margin: 0 0 8px;
-  font-size: 22px;
-`;
-
-const FaqGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 18px 20px;
 
   @media (max-width: 760px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const FaqItem = styled.div`
-  border-radius: 18px;
-  background: #ffffff;
+const Field = styled.div`
+  display: grid;
+  gap: 9px;
+
+  label {
+    font-size: 14px;
+    font-weight: 600;
+    color: ${theme.colors.text};
+  }
+`;
+
+const Input = styled.input`
+  min-height: 54px;
+  border-radius: 16px;
+  border: 1px solid ${theme.colors.border};
+  background: ${theme.colors.surface};
+  padding: 0 16px;
+  color: ${theme.colors.text};
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+
+  &:focus {
+    outline: none;
+    border-color: rgba(49, 94, 251, 0.38);
+    box-shadow: 0 0 0 4px rgba(49, 94, 251, 0.1);
+  }
+`;
+
+const Select = styled.select`
+  min-height: 54px;
+  border-radius: 16px;
+  border: 1px solid ${theme.colors.border};
+  background: ${theme.colors.surface};
+  padding: 0 16px;
+  color: ${theme.colors.text};
+
+  &:focus {
+    outline: none;
+    border-color: rgba(49, 94, 251, 0.38);
+    box-shadow: 0 0 0 4px rgba(49, 94, 251, 0.1);
+  }
+`;
+
+const ErrorText = styled.div`
+  margin: 16px 0 0;
+  color: ${theme.colors.danger};
+  font-weight: 600;
+`;
+
+const FormActions = styled.div`
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+`;
+
+const SuccessCard = styled.div`
+  padding: 24px;
+  border-radius: 20px;
+  background: ${theme.colors.surfaceAlt};
+  border: 1px solid rgba(49, 94, 251, 0.14);
+`;
+
+const SuccessTitle = styled.h3`
+  margin: 0 0 10px;
+  font-size: 24px;
+  line-height: 1.25;
+`;
+
+const FaqGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 820px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const FaqCard = styled.div`
+  border-radius: 22px;
+  background: ${theme.colors.surface};
   border: 1px solid ${theme.colors.border};
   box-shadow: ${theme.shadow.sm};
 
   details {
-    padding: 16px 18px;
+    padding: 20px 22px;
   }
 
   summary {
     cursor: pointer;
     font-weight: 600;
+    line-height: 1.5;
     list-style: none;
   }
 
@@ -1086,44 +1298,63 @@ const FaqItem = styled.div`
 `;
 
 const FaqAnswer = styled.p`
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   color: ${theme.colors.muted};
-  line-height: 1.6;
+  line-height: 1.68;
 `;
 
-const IconWrap = styled.div`
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
+const FooterMini = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 28px;
+  border-radius: 22px;
+  background: ${theme.colors.surface};
+  border: 1px solid ${theme.colors.border};
+  box-shadow: ${theme.shadow.sm};
+
+  @media (max-width: 760px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`;
+
+const FooterMiniText = styled.p`
+  margin: 0;
+  color: ${theme.colors.muted};
+  line-height: 1.65;
+`;
+
+const FooterMiniButton = styled.button`
+  min-height: 50px;
+  padding: 0 18px;
   border-radius: 14px;
-  background: rgba(70, 119, 255, 0.1);
-  color: ${theme.colors.accent};
-`;
-
-const IconBadge = styled(IconWrap)`
-  width: 44px;
-  height: 44px;
+  border: 1px solid ${theme.colors.border};
+  background: ${theme.colors.surface};
+  color: ${theme.colors.text};
+  font-weight: 700;
+  cursor: pointer;
 `;
 
 const SvgIcon = styled.svg`
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   stroke: currentColor;
   fill: none;
-  stroke-width: 1.8;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
 `;
 
 const buttonBase = `
-  min-height: 52px;
-  padding: 0 18px;
-  border-radius: 14px;
+  min-height: 54px;
+  padding: 0 22px;
+  border-radius: 16px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 
   &:hover {
     transform: translateY(-1px);
@@ -1133,9 +1364,9 @@ const buttonBase = `
 const PrimaryButton = styled.button`
   ${buttonBase}
   border: none;
-  background: ${theme.colors.accent};
+  background: linear-gradient(180deg, ${theme.colors.accent} 0%, ${theme.colors.accentStrong} 100%);
   color: #ffffff;
-  box-shadow: 0 12px 28px rgba(70, 119, 255, 0.18);
+  box-shadow: 0 16px 34px rgba(49, 94, 251, 0.22);
 
   &:disabled {
     opacity: 0.7;
@@ -1145,7 +1376,7 @@ const PrimaryButton = styled.button`
 
 const SecondaryButton = styled.button`
   ${buttonBase}
-  border: 1px solid ${theme.colors.border};
-  background: #ffffff;
+  border: 1px solid ${theme.colors.borderStrong};
+  background: rgba(255, 255, 255, 0.92);
   color: ${theme.colors.text};
 `;
