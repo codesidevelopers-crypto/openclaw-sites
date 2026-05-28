@@ -112,10 +112,10 @@ const submitLead = async (payload: FullFormPayload): Promise<void> => {
 };
 
 const trustPoints = [
-  '7–14 дней на подготовку',
-  'Оплата после согласования состава работ',
-  'Документы готовят специалисты по 152-ФЗ',
-  'Под ваш бизнес, а не шаблон из интернета',
+  'Подготовка комплекта обычно занимает 7–14 дней',
+  'Оплата только после согласования состава работ',
+  'Документы готовят специалисты с опытом по 152-ФЗ',
+  'Под ваш бизнес и процессы, а не по шаблону из интернета',
 ];
 
 const audienceItems = [
@@ -155,7 +155,7 @@ const processSteps = [
 const pricing = [
   {
     tier: 'Базовый' as PricingTier,
-    price: 'от 29 900 ₽',
+    price: 'от 4 990 ₽',
     description: 'Для бизнеса с сайтом и базовыми сценариями сбора данных.',
     items: [
       'Политика обработки ПДн',
@@ -166,14 +166,14 @@ const pricing = [
   },
   {
     tier: 'Стандарт' as PricingTier,
-    price: 'от 49 900 ₽',
+    price: 'от 9 990 ₽',
     description: 'Для бизнеса с сайтом, CRM, клиентской базой и сотрудниками.',
     items: ['Всё из базового', 'Документы по сотрудникам', 'Расширенная проработка процессов', 'Уведомление РКН и инструкция по подаче'],
     featured: true,
   },
   {
     tier: 'Расширенный' as PricingTier,
-    price: 'от 79 900 ₽',
+    price: 'от 19 990 ₽',
     description: 'Для сложных процессов: несколько сайтов, подрядчики, внешние сервисы.',
     items: ['Индивидуальная оценка процессов', 'Несколько сайтов или направлений', 'Сложные сценарии передачи данных'],
   },
@@ -638,7 +638,7 @@ const IndexPage: React.FC = () => {
       <Section id="lead-form">
         <Container narrow>
           <FormPanel>
-            <SelectedTariffNotice>{stepOne.selectedTariff ? `Вы выбрали тариф: ${stepOne.selectedTariff}${stepOne.selectedTariff === 'Базовый' ? ' — от 29 900 ₽' : stepOne.selectedTariff === 'Стандарт' ? ' — от 49 900 ₽' : stepOne.selectedTariff === 'Расширенный' ? ' — от 79 900 ₽' : ''}` : 'Тариф не выбран'}</SelectedTariffNotice>
+            <SelectedTariffNotice>{stepOne.selectedTariff ? `Вы выбрали тариф: ${stepOne.selectedTariff}${stepOne.selectedTariff === 'Базовый' ? ' — от 4 990 ₽' : stepOne.selectedTariff === 'Стандарт' ? ' — от 9 990 ₽' : stepOne.selectedTariff === 'Расширенный' ? ' — от 19 990 ₽' : ''}` : 'Тариф не выбран'}</SelectedTariffNotice>
             <FormPanelHeader>
               <SectionTitle>Заявка</SectionTitle>
               <SectionText>
@@ -748,7 +748,7 @@ const IndexPage: React.FC = () => {
                 <SectionText>
                   Спасибо! Мы получили заявку. Сейчас сервис работает в тестовом режиме: специалист изучит ответы, определит предварительный состав документов и свяжется с вами для согласования стоимости.
                 </SectionText>
-                {stepOne.selectedTariff ? <SuccessMeta>Выбранный тариф: {stepOne.selectedTariff}{stepOne.selectedTariff === 'Базовый' ? ' — от 29 900 ₽' : stepOne.selectedTariff === 'Стандарт' ? ' — от 49 900 ₽' : stepOne.selectedTariff === 'Расширенный' ? ' — от 79 900 ₽' : ''}</SuccessMeta> : null}
+                {stepOne.selectedTariff ? <SuccessMeta>Выбранный тариф: {stepOne.selectedTariff}{stepOne.selectedTariff === 'Базовый' ? ' — от 4 990 ₽' : stepOne.selectedTariff === 'Стандарт' ? ' — от 9 990 ₽' : stepOne.selectedTariff === 'Расширенный' ? ' — от 19 990 ₽' : ''}</SuccessMeta> : null}
                 <SuccessActions>
                   <SecondaryButton type="button" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>Вернуться к тарифам</SecondaryButton>
                   <PrimaryButton type="button" onClick={() => { setStep(1); setStepOne(initialStepOne); setStepTwo(initialStepTwo); setError(''); }}>Отправить ещё одну заявку</PrimaryButton>
