@@ -835,10 +835,12 @@ const Container = styled.div<{ narrow?: boolean }>`
 `;
 
 const Section = styled.section`
-  padding: 80px 0;
+  padding-top: 64px;
+  padding-bottom: 64px;
 
-  @media (max-width: 640px) {
-    padding: 64px 0 72px;
+  @media (max-width: 768px) {
+    padding-top: 48px;
+    padding-bottom: 48px;
   }
 `;
 
@@ -847,22 +849,26 @@ const TintSection = styled(Section)`
 `;
 
 const HeroSection = styled.section`
+  min-height: 480px;
   padding: 64px 0 80px;
   background-image: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37,99,235,.05) 0%, transparent 100%);
 
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
+    min-height: auto;
     padding: 48px 0 64px;
   }
 `;
 
 const HeroGrid = styled.div`
-  display: block;
-  max-width: 680px;
+  max-width: 760px;
+  margin: 0 auto;
 `;
 
 const HeroMain = styled.div`
   display: grid;
   gap: 20px;
+  justify-items: center;
+  text-align: center;
 `;
 
 const Eyebrow = styled.div`
@@ -889,7 +895,7 @@ const HeroTitle = styled.h1`
 const HeroText = styled.p`
   margin: 0;
   max-width: 680px;
-  color: ${theme.colors.muted};
+  color: #94a3b8;
   font-size: 16px;
   line-height: 1.65;
 `;
@@ -898,8 +904,11 @@ const HeroActions = styled.div`
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
+  justify-content: center;
 
   @media (max-width: 640px) {
+    width: 100%;
+
     > button {
       width: 100%;
     }
@@ -917,7 +926,8 @@ const HeroVisualImage = styled.img``;
 const TrustGrid = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0;
+  justify-content: center;
+  gap: 32px;
   margin-top: 8px;
 `;
 
@@ -925,15 +935,11 @@ const TrustCard = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
-  border-right: 1px solid ${theme.colors.border};
+  padding: 0;
   background: transparent;
   box-shadow: none;
   border-radius: 0;
-
-  &:last-child {
-    border-right: none;
-  }
+  border-right: none;
 `;
 
 const TrustIcon = styled.div`
