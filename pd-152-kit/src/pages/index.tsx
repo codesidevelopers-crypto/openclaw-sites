@@ -112,10 +112,10 @@ const submitLead = async (payload: FullFormPayload): Promise<void> => {
 };
 
 const trustPoints = [
-  'Подготовка комплекта обычно занимает 7–14 дней',
-  'Оплата только после согласования состава работ',
-  'Документы готовят специалисты с опытом по 152-ФЗ',
-  'Под ваш бизнес и процессы, а не по шаблону из интернета',
+  '7–14 дней на подготовку',
+  'Оплата после согласования',
+  'Специалисты по 152-ФЗ',
+  'Не шаблон из интернета',
 ];
 
 const audienceItems = [
@@ -1065,14 +1065,25 @@ const TrustCard = styled.div`
 `;
 
 const TrustIcon = styled.div`
-  display: none;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  color: ${theme.colors.accent};
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
 `;
 
 const TrustText = styled.p<{ $strong?: boolean }>`
   margin: 0;
   font-size: 13px;
-  font-weight: ${({ $strong }): number => ($strong ? 700 : 500)};
-  line-height: 1.5;
+  font-weight: ${({ $strong }): number => ($strong ? 700 : 600)};
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: ${theme.colors.text};
 `;
 
 const SectionHeader = styled.div`
