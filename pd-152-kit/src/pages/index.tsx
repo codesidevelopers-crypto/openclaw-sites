@@ -813,12 +813,12 @@ const Container = styled.div<{ narrow?: boolean }>`
 `;
 
 const Section = styled.section`
-  padding-top: 28px;
-  padding-bottom: 28px;
+  padding-top: 40px;
+  padding-bottom: 40px;
 
   @media (max-width: 768px) {
-    padding-top: 24px;
-    padding-bottom: 24px;
+    padding-top: 32px;
+    padding-bottom: 32px;
   }
 `;
 
@@ -828,7 +828,7 @@ const TintSection = styled(Section)`
 
 const HeroSection = styled.section`
   min-height: auto;
-  padding: 64px 0 72px;
+  padding: 64px 0 48px;
   background-image: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37,99,235,.05) 0%, transparent 100%);
 
   @media (max-width: 768px) {
