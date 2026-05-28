@@ -26,7 +26,6 @@ type StepTwoData = {
   hasEmployees: YesNoUnsure;
   filedNoticeBefore: NoticeStatus;
   needType: NeedType;
-  paymentIntent: PaymentIntent;
 };
 
 type FormMeta = {
@@ -215,7 +214,6 @@ const initialStepTwo: StepTwoData = {
   hasEmployees: 'Не уверен',
   filedNoticeBefore: 'Не знаю',
   needType: 'full_package',
-  paymentIntent: 'need_price',
 };
 
 const IconDoc = (): React.ReactElement => (
@@ -415,19 +413,12 @@ const IndexPage: React.FC = () => {
         uses_tools: stepTwo.usesTools,
         has_employees: stepTwo.hasEmployees,
         need_type: stepTwo.needType,
-        payment_intent: stepTwo.paymentIntent,
       });
 
       await submitLead(payload);
       trackEvent('form_success', {
         selected_tariff: stepOne.selectedTariff,
-        payment_intent: stepTwo.paymentIntent,
       });
-      if (stepTwo.paymentIntent === 'yes') {
-        trackEvent('high_intent_lead', {
-          selected_tariff: stepOne.selectedTariff,
-        });
-      }
       setStep(3);
     } catch (submissionError) {
       const message = submissionError instanceof Error ? submissionError.message : 'Не удалось отправить заявку.';
@@ -455,7 +446,7 @@ const IndexPage: React.FC = () => {
                 <PrimaryButton type="button" onClick={() => goToForm('hero_cta_click', 'Получить расчёт')}>
                   Получить расчёт
                 </PrimaryButton>
-                <SecondaryButton type="button" onClick={() => goToForm('hero_cta_click', 'Посмотреть, что входит ↓')}>
+                <SecondaryButton type="button" onClick={() => { trackEvent('hero_cta_click', { cta_text: 'Посмотреть, что входит ↓' }); document.getElementById('what-you-get')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
                   Посмотреть, что входит ↓
                 </SecondaryButton>
               </HeroActions>
@@ -507,7 +498,7 @@ const IndexPage: React.FC = () => {
                   </Container>
       </Section>
 
-      <Section>
+      <Section id="what-you-get">
         <Container>
           <SectionHeader>
             <SectionLabel>СОСТАВ УСЛУГИ</SectionLabel>
@@ -602,7 +593,7 @@ const IndexPage: React.FC = () => {
       <Section id="lead-form">
         <Container narrow>
           <FormPanel>
-            {stepOne.selectedTariff ? <SelectedTariffNotice>Вы выбрали: {stepOne.selectedTariff}</SelectedTariffNotice> : null}
+            <SelectedTariffNotice>{stepOne.selectedTariff ? `Вы выбрали тариф: ${stepOne.selectedTariff}${stepOne.selectedTariff === 'Базовый' ? ' — от 29 900 ₽' : stepOne.selectedTariff === 'Стандарт' ? ' — от 49 900 ₽' : stepOne.selectedTariff === 'Расширенный' ? ' — от 79 900 ₽' : ''}` : 'Тариф не выбран'}</SelectedTariffNotice>
             <FormPanelHeader>
               <SectionTitle>Заявка</SectionTitle>
               <SectionText>
@@ -636,41 +627,6 @@ const IndexPage: React.FC = () => {
                   </Field>
                   <input type="hidden" name="selectedTariff" value={stepOne.selectedTariff} />
                 </FormGrid>
-                <FieldFull>
-                  <RadioQuestionTitle>Готовы ли вы оплатить подготовку, если стоимость окажется подходящей?</RadioQuestionTitle>
-                  <RadioGroup>
-                    <RadioOption>
-                      <input
-                        type="radio"
-                        name="paymentIntent"
-                        value="yes"
-                        checked={stepTwo.paymentIntent === 'yes'}
-                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'yes' }))}
-                      />
-                      <span>Да, готов оплатить после согласования</span>
-                    </RadioOption>
-                    <RadioOption>
-                      <input
-                        type="radio"
-                        name="paymentIntent"
-                        value="need_price"
-                        checked={stepTwo.paymentIntent === 'need_price'}
-                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'need_price' }))}
-                      />
-                      <span>Хочу сначала узнать точную стоимость</span>
-                    </RadioOption>
-                    <RadioOption>
-                      <input
-                        type="radio"
-                        name="paymentIntent"
-                        value="researching"
-                        checked={stepTwo.paymentIntent === 'researching'}
-                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'researching' }))}
-                      />
-                      <span>Пока изучаю варианты</span>
-                    </RadioOption>
-                  </RadioGroup>
-                </FieldFull>
                 {error && <ErrorText>{error}</ErrorText>}
                 <FormActions>
                   <PrimaryButton type="submit">Продолжить</PrimaryButton>
@@ -775,7 +731,7 @@ const IndexPage: React.FC = () => {
               <SuccessCard>
                 <SuccessTitle>Заявка принята</SuccessTitle>
                 <SectionText>
-                  Специалист изучит ответы анкеты и свяжется с вами в течение 1–2 рабочих дней, чтобы согласовать состав документов и стоимость. Оплата потребуется только после подтверждения.
+                  Спасибо! Мы получили заявку. Сейчас сервис работает в тестовом режиме: специалист изучит ответы, определит предварительный состав документов и свяжется с вами для согласования стоимости.
                 </SectionText>
               </SuccessCard>
             )}
@@ -811,7 +767,8 @@ const IndexPage: React.FC = () => {
       <Section>
         <Container>
           <FooterMini>
-            <FooterMiniText>Короткая анкета → предварительный состав работ → согласование стоимости → подготовка комплекта.</FooterMiniText>
+            <FooterMiniText>Ответьте на несколько вопросов — мы определим состав документов</FooterMiniText>
+            <SectionText>Без мгновенной оплаты: сначала уточним процессы, состав работ и предварительную стоимость.</SectionText>
             <FooterMiniButton type="button" onClick={() => goToForm('final_cta_click', 'Получить расчёт внизу страницы')}>
               Оставить заявку
             </FooterMiniButton>
@@ -1560,8 +1517,8 @@ const FooterMini = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 16px;
-  padding: 36px 28px;
+  gap: 14px;
+  padding: 28px 24px;
   background: linear-gradient(180deg, rgba(239,246,255,1) 0%, rgba(255,255,255,1) 100%);
   border: 1px solid ${theme.colors.border};
   border-radius: 16px;
@@ -1570,7 +1527,7 @@ const FooterMini = styled.div`
 const FooterMiniText = styled.p`
   margin: 0;
   color: ${theme.colors.text};
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.4;
   max-width: 760px;
