@@ -464,6 +464,52 @@ const IndexPage: React.FC = () => {
               </TrustGrid>
             </HeroMain>
 
+            <HeroVisualWrap>
+              <HeroMockVisual aria-hidden="true">
+                <MockPanelLarge>
+                  <MockWindowHeader>
+                    <MockDot />
+                    <MockDot />
+                    <MockDot />
+                  </MockWindowHeader>
+                  <MockContentGrid>
+                    <MockFormCard>
+                      <MockTitle>Форма заявки</MockTitle>
+                      <MockField />
+                      <MockField />
+                      <MockCheckboxRow>
+                        <MockCheckbox />
+                        <MockCheckboxText />
+                      </MockCheckboxRow>
+                    </MockFormCard>
+                    <MockDocsStack>
+                      <MockDocCard>
+                        <MockDocTitle>Политика ПДн</MockDocTitle>
+                        <MockDocLine />
+                        <MockDocLine short />
+                      </MockDocCard>
+                      <MockDocCard>
+                        <MockDocTitle>Согласие</MockDocTitle>
+                        <MockDocLine />
+                        <MockDocLine short />
+                      </MockDocCard>
+                      <MockDocCard accent>
+                        <MockDocTitle>Уведомление РКН</MockDocTitle>
+                        <MockDocLine />
+                        <MockDocLine short />
+                      </MockDocCard>
+                    </MockDocsStack>
+                  </MockContentGrid>
+                </MockPanelLarge>
+                <MockShieldBadge>
+                  <ShieldCheckIcon viewBox="0 0 24 24">
+                    <path d="M12 3.75 18.5 6v5.6c0 4.15-2.5 7.2-6.5 8.65C8 18.8 5.5 15.75 5.5 11.6V6L12 3.75Z" />
+                    <path d="m9.4 11.9 1.7 1.7 3.7-3.9" />
+                  </ShieldCheckIcon>
+                </MockShieldBadge>
+              </HeroMockVisual>
+            </HeroVisualWrap>
+
           </HeroGrid>
         </Container>
       </HeroSection>
@@ -693,10 +739,20 @@ const IndexPage: React.FC = () => {
 
             {step === 3 && (
               <SuccessCard>
+                <SuccessIconWrap>
+                  <SuccessCheckIcon viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 7 10 17l-4.5-4.5" />
+                  </SuccessCheckIcon>
+                </SuccessIconWrap>
                 <SuccessTitle>Заявка принята</SuccessTitle>
                 <SectionText>
                   Спасибо! Мы получили заявку. Сейчас сервис работает в тестовом режиме: специалист изучит ответы, определит предварительный состав документов и свяжется с вами для согласования стоимости.
                 </SectionText>
+                {stepOne.selectedTariff ? <SuccessMeta>Выбранный тариф: {stepOne.selectedTariff}{stepOne.selectedTariff === 'Базовый' ? ' — от 29 900 ₽' : stepOne.selectedTariff === 'Стандарт' ? ' — от 49 900 ₽' : stepOne.selectedTariff === 'Расширенный' ? ' — от 79 900 ₽' : ''}</SuccessMeta> : null}
+                <SuccessActions>
+                  <SecondaryButton type="button" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>Вернуться к тарифам</SecondaryButton>
+                  <PrimaryButton type="button" onClick={() => { setStep(1); setStepOne(initialStepOne); setStepTwo(initialStepTwo); setError(''); }}>Отправить ещё одну заявку</PrimaryButton>
+                </SuccessActions>
               </SuccessCard>
             )}
           </FormPanel>
@@ -757,12 +813,12 @@ const Container = styled.div<{ narrow?: boolean }>`
 `;
 
 const Section = styled.section`
-  padding-top: 64px;
-  padding-bottom: 64px;
+  padding-top: 72px;
+  padding-bottom: 72px;
 
   @media (max-width: 768px) {
-    padding-top: 48px;
-    padding-bottom: 48px;
+    padding-top: 56px;
+    padding-bottom: 56px;
   }
 `;
 
@@ -771,8 +827,8 @@ const TintSection = styled(Section)`
 `;
 
 const HeroSection = styled.section`
-  min-height: 480px;
-  padding: 64px 0 80px;
+  min-height: auto;
+  padding: 64px 0 72px;
   background-image: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37,99,235,.05) 0%, transparent 100%);
 
   @media (max-width: 768px) {
@@ -782,15 +838,26 @@ const HeroSection = styled.section`
 `;
 
 const HeroGrid = styled.div`
-  max-width: 760px;
-  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+  gap: 36px;
+  align-items: center;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+    max-width: 760px;
+    margin: 0 auto;
+  }
 `;
 
 const HeroMain = styled.div`
   display: grid;
   gap: 20px;
-  justify-items: center;
-  text-align: center;
+
+  @media (max-width: 960px) {
+    justify-items: center;
+    text-align: center;
+  }
 `;
 
 const Eyebrow = styled.div`
@@ -826,7 +893,10 @@ const HeroActions = styled.div`
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  justify-content: center;
+
+  @media (max-width: 960px) {
+    justify-content: center;
+  }
 
   @media (max-width: 640px) {
     width: 100%;
@@ -838,30 +908,142 @@ const HeroActions = styled.div`
 `;
 
 const HeroVisualWrap = styled.div`
-  margin-top: 28px;
   display: flex;
   justify-content: center;
+
+  @media (max-width: 960px) {
+    margin-top: 8px;
+  }
 `;
 
-const HeroVisualCard = styled.div`
+const HeroMockVisual = styled.div`
+  position: relative;
   width: 100%;
-  max-width: 520px;
-  border-radius: 16px;
+  max-width: 460px;
+`;
+
+const MockPanelLarge = styled.div`
+  border-radius: 20px;
   border: 1px solid ${theme.colors.border};
-  background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(243,244,248,0.92) 100%);
-  box-shadow: ${theme.shadow.sm};
-  padding: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(243,244,248,0.95) 100%);
+  box-shadow: 0 12px 30px rgba(15,23,42,.08);
+  padding: 18px;
 `;
 
-const HeroGlow = styled.div`
-  display: none;
+const MockWindowHeader = styled.div`
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
 `;
 
-const HeroVisualImage = styled.img`
-  width: 100%;
-  display: block;
-  border-radius: 12px;
+const MockDot = styled.span`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #CBD5E1;
 `;
+
+const MockContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+`;
+
+const MockFormCard = styled.div`
+  border-radius: 14px;
+  background: #FFFFFF;
+  border: 1px solid ${theme.colors.border};
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+`;
+
+const MockTitle = styled.div`
+  font-size: 13px;
+  font-weight: 700;
+  color: ${theme.colors.text};
+`;
+
+const MockField = styled.div`
+  height: 10px;
+  border-radius: 999px;
+  background: #E5E7EB;
+`;
+
+const MockCheckboxRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const MockCheckbox = styled.div`
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1.5px solid ${theme.colors.accent};
+  background: ${theme.colors.accentSoft};
+`;
+
+const MockCheckboxText = styled.div`
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: #D1D5DB;
+`;
+
+const MockDocsStack = styled.div`
+  display: grid;
+  gap: 10px;
+`;
+
+const MockDocCard = styled.div<{ accent?: boolean }>`
+  border-radius: 14px;
+  background: ${({ accent }): string => accent ? '#EFF6FF' : '#FFFFFF'};
+  border: 1px solid ${({ accent }): string => accent ? '#BFDBFE' : theme.colors.border};
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+`;
+
+const MockDocTitle = styled.div`
+  font-size: 12px;
+  font-weight: 700;
+  color: ${theme.colors.text};
+`;
+
+const MockDocLine = styled.div<{ short?: boolean }>`
+  height: 8px;
+  width: ${({ short }): string => short ? '65%' : '100%'};
+  border-radius: 999px;
+  background: #D1D5DB;
+`;
+
+const MockShieldBadge = styled.div`
+  position: absolute;
+  right: -12px;
+  bottom: -12px;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #2563EB 0%, #1D4ED8 100%);
+  box-shadow: 0 10px 24px rgba(37,99,235,.28);
+`;
+
+const ShieldCheckIcon = styled.svg`
+  width: 30px;
+  height: 30px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+`;
+
+const HeroVisualCard = styled.div``;
+const HeroGlow = styled.div``;
+const HeroVisualImage = styled.img``;
 
 const TrustGrid = styled.div`
   display: flex;
@@ -1342,16 +1524,57 @@ const FieldFull = styled.div`
 `;
 
 const SuccessCard = styled.div`
-  padding: 24px;
-  border-radius: 12px;
-  background: ${theme.colors.surfaceAlt};
-  border: 1px solid ${theme.colors.border};
+  padding: 28px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FBFF 100%);
+  border: 1px solid #DCEAFE;
+  box-shadow: 0 8px 24px rgba(15,23,42,.06);
+  display: grid;
+  gap: 14px;
 `;
 
 const SuccessTitle = styled.h3`
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 24px;
   line-height: 1.25;
+`;
+
+const SuccessIconWrap = styled.div`
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #DCFCE7;
+`;
+
+const SuccessCheckIcon = styled.svg`
+  width: 24px;
+  height: 24px;
+  stroke: #16A34A;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+`;
+
+const SuccessMeta = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #EFF6FF;
+  border: 1px solid #DBEAFE;
+  color: ${theme.colors.text};
+  font-size: 14px;
+  font-weight: 600;
+`;
+
+const SuccessActions = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 `;
 
 const FaqGrid = styled.div`
