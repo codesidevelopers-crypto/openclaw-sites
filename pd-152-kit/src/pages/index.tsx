@@ -474,12 +474,6 @@ const IndexPage: React.FC = () => {
               </TrustGrid>
             </HeroMain>
 
-            <HeroVisualWrap>
-              <HeroVisualCard>
-                <HeroGlow />
-                <HeroVisualImage src={heroIllustration} alt="Иллюстрация формы сайта и комплекта документов" />
-              </HeroVisualCard>
-            </HeroVisualWrap>
           </HeroGrid>
         </Container>
       </HeroSection>
@@ -487,6 +481,7 @@ const IndexPage: React.FC = () => {
       <TintSection>
         <Container>
           <SectionHeader>
+            <SectionLabel>ДЛЯ КОГО</SectionLabel>
             <SectionTitle>Кому это актуально</SectionTitle>
           </SectionHeader>
           <FeatureGrid>
@@ -494,9 +489,11 @@ const IndexPage: React.FC = () => {
               const Icon = audienceIcons[index];
               return (
                 <FeatureCard key={item}>
-                  <FeatureIcon>
-                    <Icon />
-                  </FeatureIcon>
+                  <FeatureIconChip>
+                    <FeatureIcon>
+                      <Icon />
+                    </FeatureIcon>
+                  </FeatureIconChip>
                   <FeatureText>{item}</FeatureText>
                 </FeatureCard>
               );
@@ -513,6 +510,7 @@ const IndexPage: React.FC = () => {
       <Section>
         <Container>
           <SectionHeader>
+            <SectionLabel>СОСТАВ УСЛУГИ</SectionLabel>
             <SectionTitle>Что вы получите</SectionTitle>
           </SectionHeader>
           <ServiceGrid>
@@ -520,9 +518,11 @@ const IndexPage: React.FC = () => {
               const Icon = resultIcons[index];
               return (
                 <ServiceCard key={item}>
-                  <ServiceIcon>
-                    <Icon />
-                  </ServiceIcon>
+                  <FeatureIconChip>
+                    <ServiceIcon>
+                      <Icon />
+                    </ServiceIcon>
+                  </FeatureIconChip>
                   <ServiceText>{item}</ServiceText>
                 </ServiceCard>
               );
@@ -534,6 +534,7 @@ const IndexPage: React.FC = () => {
       <TintSection>
         <Container>
           <SectionHeader>
+            <SectionLabel>КАК МЫ РАБОТАЕМ</SectionLabel>
             <SectionTitle>Как это работает</SectionTitle>
           </SectionHeader>
           <StepsGrid>
@@ -542,9 +543,6 @@ const IndexPage: React.FC = () => {
               return (
                 <StepCard key={item.title}>
                   <StepHead>
-                    <StepIcon>
-                      <Icon />
-                    </StepIcon>
                     <StepNumber>0{index + 1}</StepNumber>
                   </StepHead>
                   <StepTitle>{item.title}</StepTitle>
@@ -560,6 +558,7 @@ const IndexPage: React.FC = () => {
       <Section id="pricing">
         <Container>
           <SectionHeader>
+            <SectionLabel>СТОИМОСТЬ</SectionLabel>
             <SectionTitle>Тарифы</SectionTitle>
             
           </SectionHeader>
@@ -786,6 +785,7 @@ const IndexPage: React.FC = () => {
       <TintSection>
         <Container>
           <SectionHeader>
+            <SectionLabel>ЧАСТЫЕ ВОПРОСЫ</SectionLabel>
             <SectionTitle>FAQ</SectionTitle>
           </SectionHeader>
           <FaqGrid>
@@ -798,7 +798,7 @@ const IndexPage: React.FC = () => {
                     }
                   }}
                 >
-                  <summary>{item.question}</summary>
+                  <summary><span>{item.question}</span><ChevronIcon viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" /></ChevronIcon></summary>
                   <FaqAnswer>{item.answer}</FaqAnswer>
                 </details>
               </FaqCard>
@@ -824,9 +824,7 @@ const IndexPage: React.FC = () => {
 export default IndexPage;
 
 const Page = styled.main`
-  background:
-    radial-gradient(circle at top right, rgba(49, 94, 251, 0.08), transparent 26%),
-    linear-gradient(180deg, #fbfcff 0%, ${theme.colors.background} 32%, ${theme.colors.background} 100%);
+  background: #F7F8FA;
   color: ${theme.colors.text};
 `;
 
@@ -837,10 +835,10 @@ const Container = styled.div<{ narrow?: boolean }>`
 `;
 
 const Section = styled.section`
-  padding: 92px 0;
+  padding: 80px 0;
 
-  @media (max-width: 768px) {
-    padding: 72px 0;
+  @media (max-width: 640px) {
+    padding: 64px 0 72px;
   }
 `;
 
@@ -849,28 +847,22 @@ const TintSection = styled(Section)`
 `;
 
 const HeroSection = styled.section`
-  padding: 64px 0 108px;
+  padding: 64px 0 80px;
+  background-image: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(37,99,235,.05) 0%, transparent 100%);
 
-  @media (max-width: 768px) {
-    padding: 48px 0 80px;
+  @media (max-width: 640px) {
+    padding: 48px 0 64px;
   }
 `;
 
 const HeroGrid = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.98fr);
-  gap: 40px;
-  align-items: center;
-
-  @media (max-width: 980px) {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
+  display: block;
+  max-width: 680px;
 `;
 
 const HeroMain = styled.div`
   display: grid;
-  gap: 22px;
+  gap: 20px;
 `;
 
 const Eyebrow = styled.div`
@@ -883,259 +875,267 @@ const Eyebrow = styled.div`
 
 const HeroTitle = styled.h1`
   margin: 0;
-  max-width: 720px;
-  font-size: clamp(40px, 5.5vw, 64px);
-  line-height: 0.98;
-  letter-spacing: -0.05em;
+  max-width: 520px;
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+
+  @media (max-width: 640px) {
+    font-size: clamp(28px, 7vw, 44px);
+  }
 `;
 
 const HeroText = styled.p`
   margin: 0;
-  max-width: 700px;
+  max-width: 680px;
   color: ${theme.colors.muted};
-  font-size: 19px;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.65;
 `;
 
 const HeroActions = styled.div`
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  padding-top: 4px;
+
+  @media (max-width: 640px) {
+    > button {
+      width: 100%;
+    }
+  }
 `;
 
 const HeroVisualWrap = styled.div`
-  display: flex;
-  justify-content: center;
+  display: none;
 `;
 
-const HeroVisualCard = styled.div`
-  position: relative;
-  width: 100%;
-  max-width: 520px;
-  padding: 26px;
-  border-radius: 34px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(242, 245, 251, 0.98) 100%);
-  border: 1px solid rgba(220, 228, 242, 0.95);
-  box-shadow: ${theme.shadow.xl};
-  overflow: hidden;
-`;
-
-const HeroGlow = styled.div`
-  position: absolute;
-  inset: auto -12% -22% auto;
-  width: 220px;
-  height: 220px;
-  background: radial-gradient(circle, rgba(49, 94, 251, 0.14) 0%, rgba(49, 94, 251, 0) 70%);
-  pointer-events: none;
-`;
-
-const HeroVisualImage = styled.img`
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  border-radius: 22px;
-  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
-`;
+const HeroVisualCard = styled.div``;
+const HeroGlow = styled.div``;
+const HeroVisualImage = styled.img``;
 
 const TrustGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-top: 8px;
+`;
+
+const TrustCard = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-right: 1px solid ${theme.colors.border};
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+
+  &:last-child {
+    border-right: none;
+  }
+`;
+
+const TrustIcon = styled.div`
+  display: none;
+`;
+
+const TrustText = styled.p<{ $strong?: boolean }>`
+  margin: 0;
+  font-size: 13px;
+  font-weight: ${({ $strong }): number => ($strong ? 700 : 500)};
+  line-height: 1.5;
+`;
+
+const SectionHeader = styled.div`
+  max-width: 760px;
+  margin-bottom: 28px;
+`;
+
+const SectionLabel = styled.span`
+  display: block;
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: ${theme.colors.accent};
+`;
+
+const SectionTitle = styled.h2`
+  margin: 0 0 12px;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+`;
+
+const SectionText = styled.p`
+  margin: 0;
+  color: ${theme.colors.muted};
+  font-size: 16px;
+  line-height: 1.65;
+`;
+
+const FeatureGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 4px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+
+  @media (max-width: 920px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const TrustCard = styled.div`
-  display: grid;
-  grid-template-columns: 40px 1fr;
-  gap: 12px;
-  align-items: start;
-  padding: 18px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid ${theme.colors.border};
-  box-shadow: ${theme.shadow.sm};
-`;
-
-const TrustIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background: ${theme.colors.accentSoft};
-  color: ${theme.colors.accent};
-`;
-
-const TrustText = styled.p<{ $strong?: boolean }>`
-  margin: 0;
-  font-size: ${({ $strong }): string => ($strong ? '15px' : '14px')};
-  font-weight: ${({ $strong }): number => ($strong ? 700 : 500)};
-  line-height: 1.55;
-`;
-
-const SectionHeader = styled.div`
-  max-width: 760px;
-  margin-bottom: 34px;
-`;
-
-const SectionTitle = styled.h2`
-  margin: 0 0 12px;
-  font-size: clamp(28px, 3.6vw, 40px);
-  line-height: 1.08;
-  letter-spacing: -0.04em;
-`;
-
-const SectionText = styled.p`
-  margin: 0;
-  color: ${theme.colors.muted};
-  font-size: 17px;
-  line-height: 1.72;
-`;
-
-const FeatureGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
-
-  @media (max-width: 920px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
 const FeatureCard = styled.div`
   display: grid;
-  grid-template-columns: 48px 1fr;
-  gap: 16px;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
   align-items: start;
-  padding: 28px;
-  border-radius: 24px;
+  padding: 20px;
+  border-radius: 12px;
   background: ${theme.colors.surface};
   border: 1px solid ${theme.colors.border};
   box-shadow: ${theme.shadow.sm};
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: border-color 0.15s, box-shadow 0.15s;
 
   &:hover {
-    transform: translateY(-2px);
+    border-color: ${theme.colors.accent};
     box-shadow: ${theme.shadow.md};
-    border-color: ${theme.colors.borderStrong};
   }
 `;
 
+const FeatureIconChip = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  padding: 8px;
+  background: ${theme.colors.accentSoft};
+`;
+
 const FeatureIcon = styled.div`
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border-radius: 16px;
-  background: linear-gradient(180deg, ${theme.colors.accentSoft} 0%, #f2f5ff 100%);
+  width: 20px;
+  height: 20px;
   color: ${theme.colors.accent};
 `;
 
 const FeatureText = styled.p`
   margin: 0;
-  line-height: 1.62;
+  font-size: 16px;
+  line-height: 1.65;
 `;
 
-const InfoStrip = styled.div`
-  padding: 26px 30px;
-  border-radius: 24px;
-  background: linear-gradient(180deg, rgba(232, 238, 255, 0.95) 0%, rgba(242, 245, 251, 0.98) 100%);
-  border: 1px solid rgba(49, 94, 251, 0.12);
-  color: ${theme.colors.text};
-  line-height: 1.72;
-  box-shadow: ${theme.shadow.sm};
-`;
+const InfoStrip = styled.div``;
 
 const ServiceGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  gap: 20px;
 
   @media (max-width: 920px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const ServiceCard = styled.div`
   display: grid;
-  gap: 18px;
-  padding: 28px;
-  border-radius: 24px;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+  gap: 14px;
+  padding: 20px;
+  border-radius: 12px;
+  background: ${theme.colors.surface};
   border: 1px solid ${theme.colors.border};
   box-shadow: ${theme.shadow.sm};
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    border-color: ${theme.colors.accent};
+    box-shadow: ${theme.shadow.md};
+  }
 `;
 
 const ServiceIcon = styled.div`
-  width: 50px;
-  height: 50px;
-  display: grid;
-  place-items: center;
-  border-radius: 18px;
-  background: linear-gradient(180deg, ${theme.colors.accentSoft} 0%, #f4f7ff 100%);
+  width: 20px;
+  height: 20px;
   color: ${theme.colors.accent};
 `;
 
 const ServiceText = styled.p`
   margin: 0;
-  line-height: 1.62;
+  font-size: 16px;
+  line-height: 1.65;
 `;
 
 const StepsGrid = styled.div`
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  gap: 20px;
 
-  @media (max-width: 920px) {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: calc(12.5% + 20px);
+    right: calc(12.5% + 20px);
+    height: 1px;
+    background: ${theme.colors.border};
+  }
+
+  @media (max-width: 640px) {
     grid-template-columns: 1fr;
+
+    &::before {
+      display: none;
+    }
   }
 `;
 
 const StepCard = styled.div`
-  padding: 30px;
-  border-radius: 26px;
+  position: relative;
+  padding: 20px;
+  border-radius: 12px;
   background: ${theme.colors.surface};
   border: 1px solid ${theme.colors.border};
   box-shadow: ${theme.shadow.sm};
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    border-color: ${theme.colors.accent};
+    box-shadow: ${theme.shadow.md};
+  }
 `;
 
 const StepHead = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 18px;
+  display: block;
+  margin-bottom: 16px;
 `;
 
 const StepIcon = styled.div`
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border-radius: 18px;
-  background: ${theme.colors.accentSoft};
-  color: ${theme.colors.accent};
+  display: none;
 `;
 
 const StepNumber = styled.div`
-  color: ${theme.colors.accent};
-  font-size: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: ${theme.colors.accent};
+  color: #fff;
+  font-size: 16px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 16px;
 `;
 
 const StepTitle = styled.h3`
@@ -1147,15 +1147,16 @@ const StepTitle = styled.h3`
 const StepDescription = styled.p`
   margin: 0;
   color: ${theme.colors.muted};
-  line-height: 1.68;
+  font-size: 16px;
+  line-height: 1.65;
 `;
 
 const PricingGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  gap: 20px;
 
-  @media (max-width: 980px) {
+  @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -1163,27 +1164,35 @@ const PricingGrid = styled.div`
 const PricingCard = styled.div<{ $featured: boolean }>`
   position: relative;
   display: grid;
-  gap: 18px;
-  padding: ${({ $featured }): string => ($featured ? '32px' : '28px')};
-  border-radius: 28px;
-  background: ${({ $featured }): string =>
-    $featured
-      ? 'linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(238,243,255,0.88) 100%)'
-      : 'linear-gradient(180deg, #ffffff 0%, #fbfcff 100%)'};
+  gap: 16px;
+  padding: 20px;
+  border-radius: 12px;
+  background: ${theme.colors.surface};
   border: ${({ $featured }): string => ($featured ? `2px solid ${theme.colors.accent}` : `1px solid ${theme.colors.border}`)};
-  box-shadow: ${({ $featured }): string => ($featured ? theme.shadow.lg : theme.shadow.sm)};
+  box-shadow: ${({ $featured }): string => ($featured ? '0 0 0 4px rgba(37,99,235,.08), 0 8px 24px rgba(15,23,42,.1)' : theme.shadow.sm)};
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    border-color: ${theme.colors.accent};
+    box-shadow: ${theme.shadow.md};
+  }
+
+  @media (max-width: 640px) {
+    order: ${({ $featured }): number => ($featured ? -1 : 0)};
+  }
 `;
 
 const PricingBadge = styled.div`
   position: absolute;
-  top: 18px;
-  right: 18px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: ${theme.colors.accentSoft};
-  color: ${theme.colors.accentStrong};
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: ${theme.colors.accent};
+  color: #fff;
   font-size: 12px;
   font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 999px;
 `;
 
 const PricingTop = styled.div`
@@ -1193,11 +1202,12 @@ const PricingTop = styled.div`
 `;
 
 const PricingIcon = styled.div`
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
+  border-radius: 8px;
+  padding: 8px;
   background: ${theme.colors.accentSoft};
   color: ${theme.colors.accent};
 `;
@@ -1217,44 +1227,67 @@ const PricingPrice = styled.div`
 
 const PricingFrom = styled.span`
   font-size: 13px;
-  color: ${theme.colors.mutedSoft};
+  color: ${theme.colors.muted};
   line-height: 1;
 `;
 
 const PricingValue = styled.span`
-  font-size: 38px;
+  font-size: 36px;
   line-height: 1;
   font-weight: 800;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.03em;
 `;
 
 const PricingDescription = styled.p`
   margin: 0;
   color: ${theme.colors.muted};
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.65;
 `;
 
 const PricingList = styled.ul`
   margin: 0;
-  padding-left: 20px;
+  padding: 0;
+  list-style: none;
   display: grid;
   gap: 10px;
-  line-height: 1.62;
+  line-height: 1.65;
+
+  li::before {
+    content: '✓';
+    color: #16A34A;
+    font-weight: 700;
+    margin-right: 8px;
+  }
 `;
 
 const PricingNote = styled.p`
-  margin: 22px 0 0;
+  margin: 20px 0 0;
   color: ${theme.colors.muted};
-  font-size: 15px;
-  line-height: 1.68;
+  font-size: 16px;
+  line-height: 1.65;
+`;
+
+const AfterPricingCta = styled.div`
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-top: 24px;
+`;
+
+const AfterPricingText = styled.p`
+  margin: 0;
+  color: ${theme.colors.muted};
+  font-size: 14px;
+  line-height: 1.5;
 `;
 
 const FormPanel = styled.div`
-  padding: 34px;
-  border-radius: 30px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 255, 0.92) 100%);
+  padding: 36px 32px;
+  border-radius: 16px;
+  background: ${theme.colors.surface};
   border: 1px solid ${theme.colors.border};
-  box-shadow: ${theme.shadow.lg};
+  box-shadow: 0 4px 24px rgba(15,23,42,.08), 0 1px 6px rgba(15,23,42,.04);
 
   @media (max-width: 640px) {
     padding: 24px;
@@ -1272,7 +1305,7 @@ const FormGrid = styled.div`
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px 20px;
 
-  @media (max-width: 760px) {
+  @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -1290,23 +1323,22 @@ const Field = styled.div`
 
 const Input = styled.input`
   min-height: 54px;
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid ${theme.colors.border};
   background: ${theme.colors.surface};
   padding: 0 16px;
   color: ${theme.colors.text};
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
 
   &:focus {
     outline: none;
-    border-color: rgba(49, 94, 251, 0.38);
-    box-shadow: 0 0 0 4px rgba(49, 94, 251, 0.1);
+    border-color: ${theme.colors.accent};
+    box-shadow: 0 0 0 3px rgba(37,99,235,.1);
   }
 `;
 
 const Select = styled.select`
   min-height: 54px;
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid ${theme.colors.border};
   background: ${theme.colors.surface};
   padding: 0 16px;
@@ -1314,8 +1346,8 @@ const Select = styled.select`
 
   &:focus {
     outline: none;
-    border-color: rgba(49, 94, 251, 0.38);
-    box-shadow: 0 0 0 4px rgba(49, 94, 251, 0.1);
+    border-color: ${theme.colors.accent};
+    box-shadow: 0 0 0 3px rgba(37,99,235,.1);
   }
 `;
 
@@ -1330,94 +1362,6 @@ const FormActions = styled.div`
   gap: 16px;
   flex-wrap: wrap;
   margin-top: 24px;
-`;
-
-const SuccessCard = styled.div`
-  padding: 24px;
-  border-radius: 20px;
-  background: ${theme.colors.surfaceAlt};
-  border: 1px solid rgba(49, 94, 251, 0.14);
-`;
-
-const SuccessTitle = styled.h3`
-  margin: 0 0 10px;
-  font-size: 24px;
-  line-height: 1.25;
-`;
-
-const FaqGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-
-  @media (max-width: 820px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const FaqCard = styled.div`
-  border-radius: 22px;
-  background: ${theme.colors.surface};
-  border: 1px solid ${theme.colors.border};
-  box-shadow: ${theme.shadow.sm};
-
-  details {
-    padding: 20px 22px;
-  }
-
-  summary {
-    cursor: pointer;
-    font-weight: 600;
-    line-height: 1.5;
-    list-style: none;
-  }
-
-  summary::-webkit-details-marker {
-    display: none;
-  }
-`;
-
-const FaqAnswer = styled.p`
-  margin: 12px 0 0;
-  color: ${theme.colors.muted};
-  line-height: 1.68;
-`;
-
-const FooterMini = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 24px 28px;
-  border-radius: 22px;
-  background: ${theme.colors.surface};
-  border: 1px solid ${theme.colors.border};
-  box-shadow: ${theme.shadow.sm};
-
-  @media (max-width: 760px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-`;
-
-const FooterMiniText = styled.p`
-  margin: 0;
-  color: ${theme.colors.muted};
-  line-height: 1.65;
-`;
-
-const AfterPricingCta = styled.div`
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-  margin-top: 28px;
-`;
-
-const AfterPricingText = styled.p`
-  margin: 0;
-  color: ${theme.colors.muted};
-  font-size: 14px;
-  line-height: 1.5;
 `;
 
 const FormMicrotext = styled.p`
@@ -1447,14 +1391,159 @@ const RadioGroup = styled.div`
 
 const RadioOption = styled.label`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
-  line-height: 1.55;
+  border: 1.5px solid ${theme.colors.border};
+  border-radius: 8px;
+  padding: 11px 14px;
   cursor: pointer;
+  font-size: 14px;
+  color: ${theme.colors.text};
+  transition: border-color 0.15s, background 0.15s;
 
   input {
-    margin-top: 3px;
+    display: none;
   }
+
+  &:has(input:checked) {
+    border-color: ${theme.colors.accent};
+    background: ${theme.colors.accentSoft};
+  }
+`;
+
+const RadioDot = styled.span`
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #CBD5E1;
+  flex: 0 0 auto;
+
+  ${RadioOption}:has(input:checked) & {
+    border-color: ${theme.colors.accent};
+    background: ${theme.colors.accent};
+    box-shadow: inset 0 0 0 3px #fff;
+  }
+`;
+
+const SuccessCard = styled.div`
+  padding: 24px;
+  border-radius: 12px;
+  background: ${theme.colors.surfaceAlt};
+  border: 1px solid ${theme.colors.border};
+`;
+
+const SuccessTitle = styled.h3`
+  margin: 0 0 10px;
+  font-size: 24px;
+  line-height: 1.25;
+`;
+
+const FaqGrid = styled.div`
+  max-width: 680px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+`;
+
+const FaqCard = styled.div`
+  border-radius: 12px;
+  background: ${theme.colors.surface};
+  border: 1px solid ${theme.colors.border};
+  box-shadow: ${theme.shadow.sm};
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: ${theme.colors.accent};
+    box-shadow: ${theme.shadow.md};
+  }
+
+  details {
+    padding: 20px;
+  }
+
+  details:not([open]):hover {
+    background: #F7F8FA;
+  }
+
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    line-height: 1.5;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details[open] svg {
+    transform: rotate(180deg);
+  }
+`;
+
+const ChevronIcon = styled.svg`
+  width: 16px;
+  height: 16px;
+  color: ${theme.colors.accent};
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.25s;
+  flex: 0 0 auto;
+`;
+
+const FaqAnswer = styled.p`
+  margin: 12px 0 0;
+  color: ${theme.colors.muted};
+  line-height: 1.65;
+`;
+
+const FooterMini = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 80px 0;
+  background: #111827;
+  border-radius: 12px;
+`;
+
+const FooterMiniText = styled.p`
+  margin: 0;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.3;
+`;
+
+const FooterMiniButton = styled.button`
+  min-height: 50px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: none;
+  background: #fff;
+  color: ${theme.colors.accent};
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,.2);
+`;
+
+const SvgIcon = styled.svg`
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 `;
 
 const StepNote = styled.p`
@@ -1464,47 +1553,26 @@ const StepNote = styled.p`
   line-height: 1.6;
 `;
 
-const FooterMiniButton = styled.button`
-  min-height: 50px;
-  padding: 0 18px;
-  border-radius: 14px;
-  border: 1px solid ${theme.colors.border};
-  background: ${theme.colors.surface};
-  color: ${theme.colors.text};
-  font-weight: 700;
-  cursor: pointer;
-`;
-
-const SvgIcon = styled.svg`
-  width: 24px;
-  height: 24px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-`;
-
 const buttonBase = `
   min-height: 54px;
   padding: 0 22px;
-  border-radius: 16px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-  }
+  transition: background .15s, box-shadow .15s, border-color .15s, color .15s;
 `;
 
 const PrimaryButton = styled.button`
   ${buttonBase}
   border: none;
-  background: linear-gradient(180deg, ${theme.colors.accent} 0%, ${theme.colors.accentStrong} 100%);
+  background: ${theme.colors.accent};
   color: #ffffff;
-  box-shadow: 0 16px 34px rgba(49, 94, 251, 0.22);
+  box-shadow: 0 4px 16px rgba(37,99,235,.18);
+
+  &:hover {
+    background: ${theme.colors.accentStrong};
+  }
 
   &:disabled {
     opacity: 0.7;
@@ -1514,15 +1582,24 @@ const PrimaryButton = styled.button`
 
 const SecondaryButton = styled.button`
   ${buttonBase}
-  border: 1px solid ${theme.colors.borderStrong};
+  border: 1px solid ${theme.colors.border};
   background: rgba(255, 255, 255, 0.92);
   color: ${theme.colors.text};
+
+  &:hover {
+    border-color: ${theme.colors.accent};
+  }
 `;
 
 const TariffButton = styled.button<{ $featured: boolean }>`
   ${buttonBase}
-  border: ${({ $featured }): string => ($featured ? 'none' : `1px solid ${theme.colors.borderStrong}`)};
-  background: ${({ $featured }): string => ($featured ? `linear-gradient(180deg, ${theme.colors.accent} 0%, ${theme.colors.accentStrong} 100%)` : 'rgba(255,255,255,0.96)')};
+  border: ${({ $featured }): string => ($featured ? 'none' : `1px solid ${theme.colors.border}`)};
+  background: ${({ $featured }): string => ($featured ? theme.colors.accent : 'rgba(255,255,255,0.96)')};
   color: ${({ $featured }): string => ($featured ? '#ffffff' : theme.colors.text)};
-  box-shadow: ${({ $featured }): string => ($featured ? '0 16px 34px rgba(49, 94, 251, 0.22)' : 'none')};
+  box-shadow: ${({ $featured }): string => ($featured ? '0 4px 16px rgba(37,99,235,.18)' : 'none')};
+
+  &:hover {
+    background: ${({ $featured }): string => ($featured ? theme.colors.accentStrong : 'rgba(255,255,255,0.96)')};
+    border-color: ${theme.colors.accent};
+  }
 `;
