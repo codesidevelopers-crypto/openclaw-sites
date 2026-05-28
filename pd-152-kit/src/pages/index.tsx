@@ -1589,7 +1589,8 @@ const SuccessActions = styled.div`
 `;
 
 const FaqGrid = styled.div`
-  max-width: 680px;
+  width: 100%;
+  max-width: 900px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
