@@ -7,7 +7,6 @@ import heroIllustration from '../images/pd152-hero-visual-polish.png';
 type PricingTier = 'Базовый' | 'Стандарт' | 'Расширенный' | 'Не знаю';
 type FormStep = 1 | 2 | 3;
 type NeedType = 'site_docs' | 'rkn_notice' | 'full_package' | 'not_sure';
-type PaymentIntent = 'yes' | 'need_price' | 'researching';
 type YesNoUnsure = 'Да' | 'Нет' | 'Не уверен';
 type NoticeStatus = 'Да' | 'Нет' | 'Не знаю';
 
@@ -680,41 +679,6 @@ const IndexPage: React.FC = () => {
                     </Select>
                   </Field>
                 </FormGrid>
-                <FieldFull>
-                  <RadioQuestionTitle>Готовы ли вы оплатить подготовку, если стоимость окажется подходящей?</RadioQuestionTitle>
-                  <RadioGroup>
-                    <RadioOption>
-                      <input
-                        type="radio"
-                        name="paymentIntent"
-                        value="yes"
-                        checked={stepTwo.paymentIntent === 'yes'}
-                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'yes' }))}
-                      />
-                      <span>Да, готов оплатить после согласования</span>
-                    </RadioOption>
-                    <RadioOption>
-                      <input
-                        type="radio"
-                        name="paymentIntent"
-                        value="need_price"
-                        checked={stepTwo.paymentIntent === 'need_price'}
-                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'need_price' }))}
-                      />
-                      <span>Хочу сначала узнать точную стоимость</span>
-                    </RadioOption>
-                    <RadioOption>
-                      <input
-                        type="radio"
-                        name="paymentIntent"
-                        value="researching"
-                        checked={stepTwo.paymentIntent === 'researching'}
-                        onChange={() => setStepTwo((current) => ({ ...current, paymentIntent: 'researching' }))}
-                      />
-                      <span>Пока изучаю варианты</span>
-                    </RadioOption>
-                  </RadioGroup>
-                </FieldFull>
                 {error && <ErrorText>{error}</ErrorText>}
                 <FormActions>
                   <SecondaryButton type="button" onClick={() => setStep(1)}>
@@ -1375,53 +1339,6 @@ const FieldFull = styled.div`
   display: grid;
   gap: 12px;
   margin-top: 8px;
-`;
-
-const RadioQuestionTitle = styled.div`
-  font-size: 14px;
-  font-weight: 600;
-  color: ${theme.colors.text};
-`;
-
-const RadioGroup = styled.div`
-  display: grid;
-  gap: 12px;
-`;
-
-const RadioOption = styled.label`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1.5px solid ${theme.colors.border};
-  border-radius: 8px;
-  padding: 11px 14px;
-  cursor: pointer;
-  font-size: 14px;
-  color: ${theme.colors.text};
-  transition: border-color 0.15s, background 0.15s;
-
-  input {
-    display: none;
-  }
-
-  &:has(input:checked) {
-    border-color: ${theme.colors.accent};
-    background: ${theme.colors.accentSoft};
-  }
-`;
-
-const RadioDot = styled.span`
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 1.5px solid #CBD5E1;
-  flex: 0 0 auto;
-
-  ${RadioOption}:has(input:checked) & {
-    border-color: ${theme.colors.accent};
-    background: ${theme.colors.accent};
-    box-shadow: inset 0 0 0 3px #fff;
-  }
 `;
 
 const SuccessCard = styled.div`
